@@ -31,8 +31,8 @@ module jt6295_rom(
     output reg [ 7:0] slot0_dout,
     output reg [ 7:0] slot1_dout,
 
-    output            slot0_ok,
-    output            slot1_ok
+    output reg        slot0_ok,
+    output reg        slot1_ok,
     // ROM interface
     output reg [17:0] rom_addr,
     input      [ 7:0] rom_data,

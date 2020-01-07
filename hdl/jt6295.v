@@ -37,16 +37,14 @@ wire        cen_sr;  // sampling rate
 wire        cen_sr4; // 4x sampling rate 
 
 wire [ 3:0] busy, start, stop;
-wire [17:0] start_addr0, end_addr0,
-            start_addr1, end_addr1,
-            start_addr2, end_addr2,
-            start_addr3, end_addr3,
-            ch_addr0, ch_addr1, ch_addr2, ch_addr3;
+wire [17:0] start_addr, stop_addr ,
+            ch_addr;
 wire [ 9:0] ctrl_addr;
-wire [ 7:0] ch_data0, ch_data1, ch_data2, ch_data3, ctrl_data;
+wire [ 7:0] ch_data, ctrl_data;
 wire [ 3:0] data0, data1, data2, data3, pipe_data;
-wire [ 3:0] att0, att1, att2, att3, pipe_att;
+wire [ 3:0] att, pipe_att;
 wire        ctrl_ok, ch_cs, ctrl_cs;
+wire signed [11:0] pipe_snd;
 
 assign      dout = { 4'hf, busy };
 
@@ -88,19 +86,10 @@ jt6295_ctrl u_ctrl(
     .wrn        ( wrn           ),
     .din        ( din           ),
     // Channel address
-    .start_addr0( start_addr0   ),
-    .end_addr0  ( end_addr0     ),
-    .start_addr1( start_addr1   ),
-    .end_addr1  ( end_addr1     ),
-    .start_addr2( start_addr2   ),
-    .end_addr2  ( end_addr2     ),
-    .start_addr3( start_addr3   ),
-    .end_addr3  ( end_addr3     ),
+    .start_addr ( start_addr    ),
+    .stop_addr  ( stop_addr     ),
     // Attenuation
-    .att0       ( att0          ),
-    .att1       ( att1          ),
-    .att2       ( att2          ),
-    .att3       ( att3          ),
+    .att        ( att           ),
     // ROM interface
     .rom_addr   ( ctrl_addr     ),
     .rom_data   ( ctrl_data     ),
@@ -119,16 +108,16 @@ jt6295_serial u_serial(
     // Flow
     .start_addr ( start_addr    ),
     .stop_addr  ( stop_addr     ),
-    .att_in     ( att           ),
+    .att        ( att           ),
     .start      ( start         ),
     .stop       ( stop          ),    
     .busy       ( busy          ),
     // ADPCM data feed    
-    .ch_addr    ( ch_addr       ),
-    .ch_data    ( ch_data       ),
+    .rom_addr   ( ch_addr       ),
+    .rom_data   ( ch_data       ),
     // serialized data
     .pipe_en    ( pipe_en       ),
-    .pipe_att   ( pip_att       ),
+    .pipe_att   ( pipe_att      ),
     .pipe_data  ( pipe_data     )
 );
 
@@ -138,7 +127,7 @@ jt6295_adpcm u_adpcm(
     .cen        ( cen_sr4       ), 
     // serialized data
     .en         ( pipe_en       ),
-    .att        ( pip_att       ),
+    .att        ( pipe_att      ),
     .data       ( pipe_data     ),
     .sound      ( pipe_snd      )
 );

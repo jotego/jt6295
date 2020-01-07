@@ -32,8 +32,7 @@ reg [10:0] lut[0:48];
 reg [ 5:0] idx_inc_II;
 reg [ 5:0] delta_idx_I,delta_idx_II, delta_idx_III, delta_idx_IV;
 
-reg [ 2:0] factor_II;
-reg [ 1:0] factor_III;
+reg [ 2:0] factor_II, factor_III;
 reg        factor_IV;
 reg        sign_II, sign_III, sign_IV, sign_V;
 reg [11:0] dn_II, qn_II, dn_III, qn_III, dn_IV, qn_IV, qn_V;
@@ -73,18 +72,17 @@ always @(posedge clk, posedge rst ) begin
         // II
         sign_III      <= sign_II;
         delta_idx_III <= factor_II[2] ? (delta_idx_II+idx_inc_II) : (delta_idx_II-6'd1);
-        qn_III <= factor_II[2] ? qn_II + dn_II : qn_II;
-        dn_III <= dn_II>>1;
-        factor_III <= factor_II[1:0];
-        delta_idx_III <=  delta_idx_II>6'd48 ? 
-            factor_II[2] ? 6'd48 : 6'd0 :
-            delta_idx_II;
+        qn_III        <= factor_II[2] ? qn_II + dn_II : qn_II;
+        dn_III        <= dn_II>>1;
+        factor_III    <= factor_II;
         // III
         sign_IV      <= sign_III;
         qn_IV        <= factor_III[1] ? qn_III + dn_III : qn_III;
         dn_IV        <= dn_III>>1;
         factor_IV    <= factor_III[0];
-        delta_idx_IV <= delta_idx_III;
+        delta_idx_IV <=  delta_idx_III>6'd48 ? 
+            (factor_III[2] ? 6'd48 : 6'd0) :
+            delta_idx_III;
         // IV
         sign_V      <= sign_IV;
         qn_V        <= factor_IV ? qn_IV + dn_IV : qn_IV;
@@ -118,6 +116,12 @@ jt6295_sh_rst #(.WIDTH(12), .STAGES(4) ) u_sound
 );
 
 assign sound = snd_out;
+
+`ifdef SIMULATION
+reg signed [11:0] ch0;
+
+always @(posedge clk) if(en)  ch0 <= snd_in;
+`endif
 
 
 initial begin

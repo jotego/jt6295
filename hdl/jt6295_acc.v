@@ -18,13 +18,13 @@
 
 
 
-jt6295_acc(
-    input               rst,
-    input               clk,
-    input               cen,
-    input               cen4,
-    input signed [11:0] sound_in,
-    input signed [13:0] sound_out
+module jt6295_acc(
+    input                rst,
+    input                clk,
+    input                cen,
+    input                cen4,
+    input  signed [11:0] sound_in,
+    output signed [13:0] sound_out
 );
 
 reg signed [13:0] acc, sum;

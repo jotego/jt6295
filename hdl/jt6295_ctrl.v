@@ -23,19 +23,10 @@ module jt6295_ctrl(
     input                  wrn,
     input      [ 7:0]      din,
     // Channel address
-    output reg [17:0]      start_addr0,
-    output reg [17:0]      end_addr0,  
-    output reg [17:0]      start_addr1,
-    output reg [17:0]      end_addr1,  
-    output reg [17:0]      start_addr2,
-    output reg [17:0]      end_addr2,  
-    output reg [17:0]      start_addr3,
-    output reg [17:0]      end_addr3,  
+    output reg [17:0]      start_addr,
+    output reg [17:0]      stop_addr,   
     // Attenuation
-    output reg [ 3:0]      att0,
-    output reg [ 3:0]      att1,
-    output reg [ 3:0]      att2,
-    output reg [ 3:0]      att3,
+    output reg [ 3:0]      att,
     // ROM interface
     output     [ 9:0]      rom_addr,
     output                 rom_cs,
@@ -53,7 +44,7 @@ wire negedge_wrn = !wrn && last_wrn;
 // new request
 reg [6:0] phrase;
 reg       pull;
-reg [3:0] ch, att;
+reg [3:0] ch, new_att;
 reg       cmd;
 
 always @(posedge clk) begin
@@ -63,15 +54,16 @@ end
 // Bus interface
 always @(posedge clk) begin
     if( rst ) begin
-        cmd <= 1'b0;
+        cmd  <= 1'b0;
+        stop <= 4'd0;
     end else begin
         pull <= 1'b0;
         if( negedge_wrn ) begin // new write
             if( cmd ) begin // 2nd byte
-                ch   <= din[7:4];
-                att  <= din[3:0];
-                cmd  <= 1'b0;
-                pull <= 1'b1;
+                ch      <= din[7:4];
+                new_att <= din[3:0];
+                cmd     <= 1'b0;
+                pull    <= 1'b1;
             end
             else if( din[7] ) begin // channel start
                 phrase <= din[6:0];
@@ -83,10 +75,9 @@ always @(posedge clk) begin
     end
 end
 
-reg [17:0] new_start, new_end;
+reg [17:0] new_start, new_stop ;
 reg [ 2:0] st;
 reg        wrom;
-assign rom_ok = wrom;
 
 assign rom_addr = { phrase, st };
 
@@ -111,31 +102,14 @@ always @(posedge clk) begin
             3'd0: new_start[17:16] <= rom_data[1:0];
             3'd1: new_start[15: 8] <= rom_data;
             3'd2: new_start[ 7: 0] <= rom_data;
-            3'd3: new_end  [17:16] <= rom_data[1:0];
-            3'd4: new_end  [15: 8] <= rom_data;
-            3'd5: new_end  [ 7: 0] <= rom_data;
+            3'd3: new_stop [17:16] <= rom_data[1:0];
+            3'd4: new_stop [15: 8] <= rom_data;
+            3'd5: new_stop [ 7: 0] <= rom_data;
             3'd6: begin
-                start <= ch;
-                if( ch[0] ) begin
-                    start_addr0 <= new_start;
-                    end_addr0   <= new_end;
-                    att0        <= att;
-                end
-                if( ch[1] ) begin
-                    start_addr1 <= new_start;
-                    end_addr1   <= new_end;
-                    att1        <= att;
-                end
-                if( ch[2] ) begin
-                    start_addr2 <= new_start;
-                    end_addr2   <= new_end;
-                    att2        <= att;
-                end
-                if( ch[3] ) begin
-                    start_addr3 <= new_start;
-                    end_addr3   <= new_end;
-                    att3        <= att;
-                end
+                start       <= ch;
+                start_addr  <= new_start;
+                stop_addr   <= new_stop ;
+                att         <= new_att;
             end
         endcase
     end

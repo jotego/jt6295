@@ -33,7 +33,7 @@ module jt6295_serial(
     // serialized data
     output reg          pipe_en,
     output reg [ 3:0]   pipe_att,
-    output reg [ 7:0]   pipe_data
+    output reg [ 3:0]   pipe_data
 );
 
 reg  [ 3:0] ch, start_latch;
@@ -81,15 +81,17 @@ assign stop_in = update ? stop_addr : stop ;
 assign cnt_in  = update ? start_addr : cnt_next;
 assign att_in  = update ? att : att_out;
 
-wire [18+18+4-1:0] csr_in, csr_out;
+localparam CSRW = 18+4+1;
 
-assign csr_in = { stop_in, cnt_in, att_in, busy_in };
-assign {stop, cnt, att_out, busy_out } = csr_out;
+wire [CSRW-1:0] csr_in, csr_out;
+
+assign csr_in = { cnt_in, att_in, busy_in };
+assign {cnt, att_out, busy_out } = csr_out;
 assign rom_addr = cnt;
 assign over = stop == cnt;
 assign busy_in = update | ( busy_out & ~over );
 
-jt6295_sh_rst #(.WIDTH(18+18+4), .STAGES(4) ) u_cnt
+jt6295_sh_rst #(.WIDTH(CSRW), .STAGES(4) ) u_cnt
 (
     .rst    ( rst       ),
     .clk    ( clk       ),
