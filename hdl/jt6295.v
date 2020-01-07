@@ -30,7 +30,7 @@ module jt6295(
     input         [ 7:0]   rom_data,
     input                  rom_ok,
     // Sound output
-    output signed [11:0]   sound
+    output signed [13:0]   sound
 );
 
 wire        cen_sr;  // sampling rate
