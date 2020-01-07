@@ -39,6 +39,41 @@ module jt6295_rom(
     input             rom_ok
 );
 
+reg [1:0] datasel;
+
+always @(posedge clk, posedge rst) begin
+    if( rst ) begin
+        rom_addr <= 18'd0;
+        datasel  <= 2'b0;
+    end else begin
+        if( (datasel && rom_ok) || !datasel ) begin
+            datasel <= 2'b0;
+
+            if( slot0_cs ) slot0_ok <= 1'b0;
+            if( slot1_cs ) slot1_ok <= 1'b0;
+
+            if(rom_ok && datasel[0]) begin
+                slot0_dout <= rom_data;
+                slot0_ok   <= 1'b1;
+            end
+            
+            if(rom_ok && datasel[1]) begin
+                slot1_dout <= rom_data;
+                slot1_ok   <= 1'b1;
+            end
+
+            if( slot0_cs ) begin
+                rom_addr     <= slot0_addr;
+                datasel[1:0] <= 2'b01;
+            end else
+            if( slot1_cs ) begin
+                rom_addr     <= slot1_addr;
+                datasel[1:0] <= 2'b10;
+            end
+        end
+    end
+end
+
 
 
 endmodule
