@@ -31,16 +31,16 @@ module jt6295_serial(
     output     [17:0]   rom_addr,
     input      [ 7:0]   rom_data,
     // serialized data
-    output              pipe_en,
-    output    [ 3:0]    pipe_att,
-    output    [ 7:0]    pipe_data
+    output reg          pipe_en,
+    output reg [ 3:0]   pipe_att,
+    output reg [ 7:0]   pipe_data
 );
 
 reg  [ 3:0] ch, start_latch;
 wire [ 3:0] att_in, att_out;
 wire [17:0] cnt, ch_end;
 wire [17:0] cnt_next = cnt+18'd1;
-wire [17]   cnt_in, stop_in;
+wire [17:0] cnt_in, stop_in;
 wire        update = start_latch==ch;
 wire        over, busy_in, busy_out;
 
@@ -101,15 +101,6 @@ jt6295_sh_rst #(.WIDTH(18+18+4), .STAGES(4) ) u_cnt
 // Channel data is latched for a clock cycle to wait for ROM data
 reg       sel, en;
 reg [3:0] attx;
-
-jt6295_sh_rst #(.WIDTH(18+18+4), .STAGES(4) ) u_cnt
-(
-    .rst    ( rst       ),
-    .clk    ( clk       ),
-    .clk_en ( cen       ),
-    .din    ( csr_in    ),
-    .drop   ( csr_out   )
-);
 
 always @(posedge clk, posedge rst) begin
     if(rst) begin

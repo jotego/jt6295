@@ -46,7 +46,7 @@ wire [ 9:0] ctrl_addr;
 wire [ 7:0] ch_data0, ch_data1, ch_data2, ch_data3, ctrl_data;
 wire [ 3:0] data0, data1, data2, data3, pipe_data;
 wire [ 3:0] att0, att1, att2, att3, pipe_att;
-wire        ctrl_ok;
+wire        ctrl_ok, ch_cs, ctrl_cs;
 
 assign      dout = { 4'hf, busy };
 
@@ -62,16 +62,21 @@ jt6295_timing u_timing(
 jt6295_rom u_rom(
     .rst        ( rst           ),
     .clk        ( clk           ),
+    .slot0_cs   ( ch_cs         ),
+    .slot1_cs   ( ctrl_cs       ),
     // Each parallel accessing device
     .slot0_addr ( ch_addr       ),
     .slot1_addr ( { 8'd0, ctrl_addr } ),
     // Data
     .slot0_dout ( ch_data       ),
-    .slot1_addr ( ctrl_data     ),
+    .slot1_dout ( ctrl_data     ),
     // Ok
     .slot0_ok   (               ),
     .slot1_ok   ( ctrl_ok       ),
-    // 
+    // ROM interface
+    .rom_addr   ( rom_addr      ),
+    .rom_data   ( rom_data      ),
+    .rom_ok     ( rom_ok        )
 );
 
 // CPU interface
@@ -100,6 +105,7 @@ jt6295_ctrl u_ctrl(
     .rom_addr   ( ctrl_addr     ),
     .rom_data   ( ctrl_data     ),
     .rom_ok     ( ctrl_ok       ),
+    .rom_cs     ( ctrl_cs       ),
 
     .start      ( start         ),
     .stop       ( stop          ),

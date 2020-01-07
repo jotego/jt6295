@@ -38,11 +38,12 @@ module jt6295_ctrl(
     output reg [ 3:0]      att3,
     // ROM interface
     output     [ 9:0]      rom_addr,
-    input      [ 7:0]      rom_data,
+    output                 rom_cs,
+    input      [ 7:0]      rom_data,    
     input                  rom_ok,
     // flow control
-    output     [ 3:0]      start,
-    output     [ 3:0]      stop,
+    output reg [ 3:0]      start,
+    output reg [ 3:0]      stop,
     input      [ 3:0]      busy
 );
 
@@ -84,6 +85,8 @@ end
 
 reg [17:0] new_start, new_end;
 reg [ 2:0] st;
+reg        wrom;
+assign rom_ok = wrom;
 
 assign rom_addr = { phrase, st };
 
@@ -133,7 +136,6 @@ always @(posedge clk) begin
                     end_addr3   <= new_end;
                     att3        <= att;
                 end
-            end
             end
         endcase
     end
