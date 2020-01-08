@@ -84,6 +84,7 @@ jt6295_rom u_rom(
 jt6295_ctrl u_ctrl(
     .rst        ( rst           ),
     .clk        ( clk           ),
+    .cen        ( cen_sr        ),
     // CPU
     .wrn        ( wrn           ),
     .din        ( din           ),
@@ -106,7 +107,8 @@ jt6295_ctrl u_ctrl(
 jt6295_serial u_serial(
     .rst        ( rst           ),
     .clk        ( clk           ),
-    .cen        ( cen_sr4       ), 
+    .cen        ( cen_sr        ), 
+    .cen4       ( cen_sr4       ),
     // Flow
     .start_addr ( start_addr    ),
     .stop_addr  ( stop_addr     ),

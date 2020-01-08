@@ -7,11 +7,11 @@ wire irq;
 reg  clk, cen=1'b0;
 
 
-wire ss = 1'b0;
+wire ss = 1'b1;
 wire [17:0] rom_addr;
 reg  [17:0] rom_last;
 reg  [ 7:0] rom_data;
-wire        rom_ok = rom_last != rom_addr;
+wire        rom_ok = rom_last == rom_addr;
 wire signed [13:0] sound;
 reg         wrn=1'b1;
 reg  [ 7:0] din;
@@ -59,16 +59,19 @@ initial begin
     #750 rst=1'b0;
 end
 
-integer cnt=0, wrst=0;
+integer cnt=0, wrst=0, aux;
 
 reg [7:0] cmd[0:15];
 
 initial begin
+    for( aux=0; aux<16; aux=aux+1) cmd[aux] = 8'd0; // wait
+
     cmd[0] = 8'h78; // suspend all channels
-    cmd[1] = 8'h81; // phrase 1
-    cmd[2] = 8'h10; // channel 0
-    cmd[3] = 8'h00; // wait
-    cmd[4] = 8'h01; // finish
+    //cmd[1] = 8'h81; // phrase 1
+    //cmd[2] = 8'h10; // channel 0
+    cmd[1] = 8'h82; // phrase 1
+    cmd[2] = 8'h20; // channel 1
+    cmd[15] = 8'h01; // finish
 end
 
 always @(posedge clk, posedge rst) begin
@@ -98,7 +101,7 @@ always @(posedge clk, posedge rst) begin
 
             9: begin   // wait
                 cnt <= cnt+1;          
-                #10_000_000 wrst <= 0;
+                #20_000_000 wrst <= 0;
             end
             10: #10_000 $finish;
         endcase

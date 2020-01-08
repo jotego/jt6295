@@ -45,7 +45,7 @@ always @(posedge clk, posedge rst) begin
     end
 end
 
-jt12_interpol #(.calcw(14+8), .inw(14), 
+jt12_interpol #(.calcw(14+6), .inw(14), 
     .n(2),    // number of stages
     .m(4),    // depth of comb filter
     .rate(4)  // it will stuff with as many as (rate-1) zeros

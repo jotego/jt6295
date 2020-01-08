@@ -19,6 +19,7 @@
 module jt6295_ctrl(
     input                  rst,
     input                  clk,
+    input                  cen,
     // CPU
     input                  wrn,
     input      [ 7:0]      din,
@@ -76,7 +77,8 @@ always @(posedge clk) begin
     end
 end
 
-reg [17:0] new_start, new_stop ;
+reg [17:0] new_start;
+reg [17:8] new_stop;
 reg [ 2:0] st;
 reg        wrom;
 
@@ -90,6 +92,7 @@ always @(posedge clk) begin
         start_addr <= 18'd0;
         stop_addr  <= 18'd0;
         rom_cs <= 1'b0;
+        start  <= 4'd0;
     end else begin
         if(st!=3'd7) begin
             wrom <= 1'b0;
@@ -99,22 +102,24 @@ always @(posedge clk) begin
             end
         end
         case(st)
-            3'd7: if(pull) begin
-                st       <= 3'd0;
-                wrom     <= 1'b1;
-                start    <= 4'd0;
-                rom_cs   <= 1'b1;
+            3'd7: begin
+                if(pull) begin
+                    st       <= 3'd0;
+                    wrom     <= 1'b1;
+                    start    <= 4'd0;
+                    rom_cs   <= 1'b1;
+                end
+                if(cen) start <= start & busy;
             end
-            3'd0: new_start[17:16] <= rom_data[1:0];
-            3'd1: new_start[15: 8] <= rom_data;
-            3'd2: new_start[ 7: 0] <= rom_data;
-            3'd3: new_stop [17:16] <= rom_data[1:0];
-            3'd4: new_stop [15: 8] <= rom_data;
-            3'd5: new_stop [ 7: 0] <= rom_data;
+            3'd1: new_start[17:16] <= rom_data[1:0];
+            3'd2: new_start[15: 8] <= rom_data;
+            3'd3: new_start[ 7: 0] <= rom_data;
+            3'd4: new_stop [17:16] <= rom_data[1:0];
+            3'd5: new_stop [15: 8] <= rom_data;
             3'd6: begin
-                start       <= ch;
+                start       <= start | ch;
                 start_addr  <= new_start;
-                stop_addr   <= new_stop ;
+                stop_addr   <= {new_stop[17:8], rom_data} ;
                 att         <= new_att;
                 rom_cs      <= 1'b0;
             end
