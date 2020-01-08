@@ -137,7 +137,8 @@ jt6295_adpcm u_adpcm(
 jt6295_acc u_acc(
     .rst        ( rst           ),
     .clk        ( clk           ),
-    .cen        ( cen_sr4       ), 
+    .cen        ( cen_sr        ),
+    .cen4       ( cen_sr4       ),
     // serialized data
     .sound_in   ( pipe_snd      ),
     .sound_out  ( sound         )

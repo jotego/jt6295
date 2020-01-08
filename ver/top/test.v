@@ -7,7 +7,7 @@ wire irq;
 reg  clk, cen=1'b0;
 
 
-wire ss = 1'b1;
+wire ss = 1'b0;
 wire [17:0] rom_addr;
 reg  [17:0] rom_last;
 reg  [ 7:0] rom_data;
@@ -16,6 +16,7 @@ wire signed [13:0] sound;
 reg         wrn=1'b1;
 reg  [ 7:0] din;
 wire [ 7:0] dout;
+reg  [ 7:0] rom[0:262143];
 
 always @(posedge clk) begin
     rom_last <= rom_addr;
@@ -38,8 +39,6 @@ jt6295 uut(
     // Sound output
     .sound      ( sound     )
 );
-
-reg [7:0] rom[0:262143];
 
 initial begin
     clk=1'b0;
@@ -99,9 +98,9 @@ always @(posedge clk, posedge rst) begin
 
             9: begin   // wait
                 cnt <= cnt+1;          
-                #100_000 wrst <= 0;
+                #10_000_000 wrst <= 0;
             end
-            10: #2000 $finish;
+            10: #10_000 $finish;
         endcase
     end
 end
@@ -111,7 +110,7 @@ integer cen_cnt=0;
 always @(posedge clk) begin
     cen <= 1'b0;
     if(cen_cnt==0) cen<=1'b1;
-    cen_cnt <= cen_cnt==0 ? 7 : (cen_cnt-1);
+    cen_cnt <= cen_cnt==0 ? 3 : (cen_cnt-1);
 end
 
 `ifndef NCVERILOG

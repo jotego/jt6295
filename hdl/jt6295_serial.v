@@ -73,7 +73,7 @@ always @(posedge clk, posedge rst) begin
         if(cen) 
             start_latch <= 4'b0;
         else
-            start_latch |= start;        
+            start_latch <= start_latch | start;        
     end
 end
 
