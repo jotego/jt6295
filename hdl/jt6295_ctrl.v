@@ -29,7 +29,7 @@ module jt6295_ctrl(
     output reg [ 3:0]      att,
     // ROM interface
     output     [ 9:0]      rom_addr,
-    output                 rom_cs,
+    output reg             rom_cs,
     input      [ 7:0]      rom_data,    
     input                  rom_ok,
     // flow control
@@ -39,7 +39,7 @@ module jt6295_ctrl(
 );
 
 reg  last_wrn;
-wire negedge_wrn = !wrn && last_wrn;
+wire posedge_wrn  = wrn && !last_wrn;
 
 // new request
 reg [6:0] phrase;
@@ -56,9 +56,10 @@ always @(posedge clk) begin
     if( rst ) begin
         cmd  <= 1'b0;
         stop <= 4'd0;
+        ch   <= 4'd0;
     end else begin
         pull <= 1'b0;
-        if( negedge_wrn ) begin // new write
+        if( posedge_wrn  ) begin // new write
             if( cmd ) begin // 2nd byte
                 ch      <= din[7:4];
                 new_att <= din[3:0];
@@ -85,6 +86,10 @@ assign rom_addr = { phrase, st };
 always @(posedge clk) begin
     if( rst ) begin
         st <= 3'd7;
+        att <= 4'd0;
+        start_addr <= 18'd0;
+        stop_addr  <= 18'd0;
+        rom_cs <= 1'b0;
     end else begin
         if(st!=3'd7) begin
             wrom <= 1'b0;
@@ -98,6 +103,7 @@ always @(posedge clk) begin
                 st       <= 3'd0;
                 wrom     <= 1'b1;
                 start    <= 4'd0;
+                rom_cs   <= 1'b1;
             end
             3'd0: new_start[17:16] <= rom_data[1:0];
             3'd1: new_start[15: 8] <= rom_data;
@@ -110,6 +116,7 @@ always @(posedge clk) begin
                 start_addr  <= new_start;
                 stop_addr   <= new_stop ;
                 att         <= new_att;
+                rom_cs      <= 1'b0;
             end
         endcase
     end

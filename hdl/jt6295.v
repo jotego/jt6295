@@ -57,6 +57,8 @@ jt6295_timing u_timing(
 );
 
 // ROM interface
+assign ch_cs = cen_sr4;
+
 jt6295_rom u_rom(
     .rst        ( rst           ),
     .clk        ( clk           ),

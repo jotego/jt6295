@@ -13,7 +13,7 @@ reg  [17:0] rom_last;
 reg  [ 7:0] rom_data;
 wire        rom_ok = rom_last != rom_addr;
 wire signed [13:0] sound;
-reg         wrn;
+reg         wrn=1'b1;
 reg  [ 7:0] din;
 wire [ 7:0] dout;
 
@@ -60,10 +60,50 @@ initial begin
     #750 rst=1'b0;
 end
 
-integer cnt=0;
+integer cnt=0, wrst=0;
 
-always @(posedge clk) if(cen) begin
+reg [7:0] cmd[0:15];
 
+initial begin
+    cmd[0] = 8'h78; // suspend all channels
+    cmd[1] = 8'h81; // phrase 1
+    cmd[2] = 8'h10; // channel 0
+    cmd[3] = 8'h00; // wait
+    cmd[4] = 8'h01; // finish
+end
+
+always @(posedge clk, posedge rst) begin
+    if(rst) begin
+        wrst <= 0;
+        din  <= 8'd0;
+        cnt  <= 0;
+        wrn  <= 1;
+    end else begin
+        case( wrst )
+            0: begin
+                case( cmd[cnt] )
+                    8'h00: wrst <= 9;
+                    8'h01: wrst <= 10;
+                    default: begin
+                        wrn  <= 1'b0;
+                        din  <= cmd[cnt];
+                        wrst <= 1;
+                    end
+                endcase
+            end
+            1: begin
+                cnt <= cnt+1;
+                wrn <= 1'b1;
+                wrst <= 0;
+            end
+
+            9: begin   // wait
+                cnt <= cnt+1;          
+                #100_000 wrst <= 0;
+            end
+            10: #2000 $finish;
+        endcase
+    end
 end
 
 integer cen_cnt=0;
@@ -71,7 +111,7 @@ integer cen_cnt=0;
 always @(posedge clk) begin
     cen <= 1'b0;
     if(cen_cnt==0) cen<=1'b1;
-    cen_cnt <= cen_cnt==0 ? 3 : (cen_cnt-1);
+    cen_cnt <= cen_cnt==0 ? 7 : (cen_cnt-1);
 end
 
 `ifndef NCVERILOG

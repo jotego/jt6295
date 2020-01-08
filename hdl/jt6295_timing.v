@@ -36,10 +36,10 @@ always @(posedge clk) begin
     cen_sr4 <= 1'd0;
     cen_sr  <= 1'd0;
     if( cen ) begin
-        base    <= (base==lim) ? 3'd0 : 3'd1;
+        base    <= (base==lim) ? 3'd0 : base+3'd1;
         if(base==3'd0) cnt <= (cnt==6'd32) ? 6'd0 : cnt+6'd1;
 
-        cen_sr4 <= ~base[2];
+        cen_sr4 <= !base[2] && cnt==6'd0;
         cen_sr  <= {cnt,base} == 9'd0;
     end
 end
