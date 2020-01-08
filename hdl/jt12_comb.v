@@ -38,14 +38,21 @@ generate
     genvar k;
     reg signed [w-1:0] mem[0:m-1];
     assign prev=mem[m-1];
-    for(k=0;k<m;k=k+1) begin : mem_gen
+    for(k=1;k<m;k=k+1) begin : mem_gen
         always @(posedge clk)
             if(rst) begin
                 mem[k] <= {w{1'b0}};
             end else if(cen) begin
-                mem[k] <= k==0 ? snd_in : mem[k-1];
+                mem[k] <= mem[k-1];
             end
     end
+    // k=0 (I take out to avoid a warning about mem[k-1] when k is 0)
+    always @(posedge clk)
+        if(rst) begin
+            mem[0] <= {w{1'b0}};
+        end else if(cen) begin
+            mem[0] <= snd_in;
+        end    
 endgenerate
 
 // Comb filter at synthesizer sampling rate

@@ -146,4 +146,14 @@ jt6295_acc u_acc(
     .sound_out  ( sound         )
 );
 
+`ifdef SIMULATION
+integer fsnd;
+initial begin
+    fsnd=$fopen("jt6295.raw","wb");
+end
+wire signed [15:0] snd_log = { sound, 2'b0 };
+always @(posedge cen_sr) begin
+    $fwrite(fsnd,"%u", {snd_log, snd_log});
+end
+`endif
 endmodule

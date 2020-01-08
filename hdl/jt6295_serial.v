@@ -39,12 +39,11 @@ module jt6295_serial(
 
 reg  [ 3:0] ch, start_latch, start_csr;
 wire [ 3:0] att_in, att_out;
-wire [17:0] cnt, ch_end;
-wire [17:0] cnt_next;
-wire [17:0] cnt_in, stop_in, stop_out;
+wire [18:0] cnt, cnt_next, cnt_in;
+wire [17:0] ch_end, stop_in, stop_out;
 wire        update = start_latch[0] & ~start_csr[0];
 wire        over, busy_in, busy_out;
-assign      cnt_next = busy_out ? cnt+18'd1 : cnt;
+assign      cnt_next = busy_out ? cnt+19'd1 : cnt;
 
 // Busy
 always @(posedge clk, posedge rst) begin
@@ -84,18 +83,18 @@ always @(posedge clk, posedge rst) begin
 end
 
 assign stop_in = update ? stop_addr : stop_out;
-assign cnt_in  = update ? start_addr : cnt_next;
+assign cnt_in  = update ? {start_addr, 1'b0} : cnt_next;
 assign att_in  = update ? att : att_out;
 
-localparam CSRW = 18+18+4+1;
+localparam CSRW = 18+19+4+1;
 
 wire [CSRW-1:0] csr_in, csr_out;
 
 assign csr_in = { stop_in, cnt_in, att_in, busy_in };
 assign {stop_out, cnt, att_out, busy_out } = csr_out;
-assign rom_addr = cnt;
-assign over = cnt >= stop_out;
-assign busy_in = update | ( busy_out & ~over );
+assign rom_addr = cnt[18:1];
+assign over     = rom_addr >= stop_out;
+assign busy_in  = update | ( busy_out & ~over );
 
 jt6295_sh_rst #(.WIDTH(CSRW), .STAGES(4) ) u_cnt
 (
@@ -121,7 +120,7 @@ always @(posedge clk, posedge rst) begin
     end else if(cen4) begin
         // data
         sel       <= cnt[0];
-        pipe_data <= sel ? rom_data[7:4] : rom_data[3:0];
+        pipe_data <= !sel ? rom_data[7:4] : rom_data[3:0];
         // attenuation
         attx      <= att_out;
         pipe_att  <= attx;

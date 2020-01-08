@@ -61,17 +61,17 @@ end
 
 integer cnt=0, wrst=0, aux;
 
-reg [7:0] cmd[0:15];
+reg [7:0] cmd[0:63];
 
 initial begin
-    for( aux=0; aux<16; aux=aux+1) cmd[aux] = 8'd0; // wait
+    for( aux=0; aux<64; aux=aux+1) cmd[aux] = 8'd0; // wait
 
     cmd[0] = 8'h78; // suspend all channels
     //cmd[1] = 8'h81; // phrase 1
-    //cmd[2] = 8'h10; // channel 0
-    cmd[1] = 8'h82; // phrase 1
-    cmd[2] = 8'h20; // channel 1
-    cmd[15] = 8'h01; // finish
+    cmd[2] = 8'h10; // channel 0
+    cmd[1] = 8'h94; // phrase 17
+   // cmd[2] = 8'h20; // channel 1
+    cmd[63] = 8'h01; // finish
 end
 
 always @(posedge clk, posedge rst) begin
@@ -116,6 +116,7 @@ always @(posedge clk) begin
     cen_cnt <= cen_cnt==0 ? 3 : (cen_cnt-1);
 end
 
+//`ifdef DUMP
 `ifndef NCVERILOG
     initial begin
         $dumpfile("test.lxt");
@@ -128,5 +129,6 @@ end
         $shm_probe(test,"AS");
     end
 `endif
+//`endif
 
 endmodule
