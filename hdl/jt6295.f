@@ -1,0 +1,10 @@
+jt12_comb.v
+jt12_interpol.v
+jt6295_acc.v
+jt6295_adpcm.v
+jt6295_ctrl.v
+jt6295_rom.v
+jt6295_serial.v
+jt6295_sh_rst.v
+jt6295_timing.v
+jt6295.v
