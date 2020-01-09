@@ -17,13 +17,13 @@
     Date: 6-1-2020 */
 
 module jt6295_adpcm(
-    input                rst,
-    input                clk,
-    input                cen,
-    input                en,
-    input         [ 3:0] att,
-    input         [ 3:0] data,
-    output signed [11:0] sound
+    input                    rst,
+    input                    clk,
+    input                    cen,
+    input                    en,
+    input             [ 3:0] att,
+    input             [ 3:0] data,
+    output reg signed [11:0] sound
 );
 
 
@@ -101,10 +101,29 @@ jt6295_sh_rst #(.WIDTH(1), .STAGES(4) ) u_enable
     .drop   ( en_V      )
 );
 
+wire [3:0] att_VI;
+
+jt6295_sh_rst #(.WIDTH(4), .STAGES(5) ) u_att
+(
+    .rst    ( rst       ),
+    .clk    ( clk       ),
+    .clk_en ( cen       ),
+    .din    ( att       ),
+    .drop   ( att_VI    )
+);
+
 
 wire signed [11:0] snd_in, snd_out;
+reg  signed [11:0] snd_VI;
+wire signed [11:0] snd_att_VI = snd_VI>>>att_VI[3:1];
 
 assign snd_in = !en_V ? 12'd0 : (sign_V ? snd_out - qn_V : snd_out + qn_V);
+
+always @(posedge clk) if(cen) begin
+    snd_VI <= snd_in;    
+    sound  <= att_VI > 4'b1000 ? 12'd0 :
+        snd_att_VI - (att_VI[0] ? (snd_att_VI>>>2) : 12'd0 );
+end
 
 jt6295_sh_rst #(.WIDTH(12), .STAGES(4) ) u_sound
 (
@@ -114,8 +133,6 @@ jt6295_sh_rst #(.WIDTH(12), .STAGES(4) ) u_sound
     .din    ( snd_in    ),
     .drop   ( snd_out   )
 );
-
-assign sound = snd_out;
 
 `ifdef SIMULATION
 reg signed [11:0] ch0;

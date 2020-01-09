@@ -41,7 +41,8 @@ module jt6295_rom(
 
 reg [ 1:0] datasel;
 reg [17:0] last0, last1;
-
+reg [ 2:0] okdly;
+wire       rom_good = &{okdly, rom_ok};
 
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
@@ -51,20 +52,22 @@ always @(posedge clk, posedge rst) begin
         last1    <= 18'd0;
         slot0_dout <= 8'd0;
         slot1_dout <= 8'd0;
+        okdly      <= 1'b0;
     end else begin
-        slot0_ok <= last0 != slot0_addr;
-        slot1_ok <= last1 != slot1_addr;
+        okdly <= { okdly[1:0], rom_ok };
+        if( last0 != slot0_addr ) slot0_ok <= 1'b0;
+        if( last1 != slot1_addr ) slot1_ok <= 1'b0;
 
-        if( (datasel && rom_ok) ) begin
+        if( (datasel && rom_good) ) begin
             datasel <= 2'b0;
 
-            if(rom_ok && datasel[0]) begin
+            if(datasel[0]) begin
                 last0      <= slot0_addr;
                 slot0_dout <= rom_data;
                 slot0_ok   <= 1'b1;
             end
             
-            if(rom_ok && datasel[1]) begin
+            if(datasel[1]) begin
                 last1      <= slot1_addr;
                 slot1_dout <= rom_data;
                 slot1_ok   <= 1'b1;
@@ -77,10 +80,12 @@ always @(posedge clk, posedge rst) begin
             if( slot0_cs ) begin
                 rom_addr     <= slot0_addr;
                 datasel[1:0] <= 2'b01;
+                okdly        <= 1'b0;
             end else
             if( slot1_cs ) begin
                 rom_addr     <= slot1_addr;
                 datasel[1:0] <= 2'b10;
+                okdly        <= 1'b0;
             end
         end
     end
