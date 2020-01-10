@@ -28,6 +28,7 @@ module jt6295_serial(
     input      [ 3:0]   start,
     input      [ 3:0]   stop,
     output reg [ 3:0]   busy,
+    output              zero,
     // ADPCM data feed    
     output     [17:0]   rom_addr,
     input      [ 7:0]   rom_data,
@@ -44,6 +45,7 @@ wire [17:0] ch_end, stop_in, stop_out;
 (*keep*) wire        update = start_latch[0] & ~start_csr[0];
 (*keep*) wire        over, busy_in, busy_out;
 assign      cnt_next = busy_out ? cnt+19'd1 : cnt;
+assign      zero     = ch[3];
 
 // Busy
 always @(posedge clk, posedge rst) begin
@@ -62,8 +64,8 @@ always @(posedge clk, posedge rst) begin
     if(rst)
         ch <= 4'b1;
     else begin
-        if(cen4) ch <= { ch[0], ch[3:1]  };
-        if(cen)  ch <= 4'b0001; // keep it sync'ed with the start_latch
+        // if(cen4) ch <= { ch[0], ch[3:1]  };
+        if(cen4) ch <= { ch[2:0], ch[3]  };
     end
 end
 
@@ -73,14 +75,9 @@ always @(posedge clk, posedge rst) begin
     if(rst) begin
         start_latch <= 4'b0;
         start_csr   <= 4'b0;
-    end else begin        
-        if(cen4) begin
-            start_csr   <= { start_latch[0], start_csr[3:1] };
-            start_latch <= start_latch >> 1;
-        end
-        if(cen) begin
-            start_latch <= start;
-        end
+    end else if(cen4) begin        
+        start_csr   <= { start_latch[0], start_csr[3:1] };
+        start_latch <= zero ? start : start_latch >> 1;
     end
 end
 

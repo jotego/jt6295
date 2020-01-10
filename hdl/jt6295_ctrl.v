@@ -36,7 +36,8 @@ module jt6295_ctrl(
     // flow control
     output reg [ 3:0]      start,
     output reg [ 3:0]      stop,
-    input      [ 3:0]      busy
+    input      [ 3:0]      busy,
+    input                  zero
 );
 
 reg  last_wrn;
@@ -106,10 +107,10 @@ always @(posedge clk) begin
                 if(pull) begin
                     st       <= 3'd0;
                     wrom     <= 1'b1;
-                    start    <= 4'd0;
+                    start    <= start & busy; // 4'd0;
                     rom_cs   <= 1'b1;
                 end
-                if(cen4) start <= start & busy;
+                //if(cen4 & zero) start <= start & busy;
             end
             3'd1: new_start[17:16] <= rom_data[1:0];
             3'd2: new_start[15: 8] <= rom_data;

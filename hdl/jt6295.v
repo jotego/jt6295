@@ -43,7 +43,7 @@ wire [ 9:0] ctrl_addr;
 wire [ 7:0] ch_data, ctrl_data;
 wire [ 3:0] data0, data1, data2, data3, pipe_data;
 wire [ 3:0] att, pipe_att;
-wire        ctrl_ok, ch_cs, ctrl_cs;
+wire        ctrl_ok, ch_cs, ctrl_cs, zero;
 wire signed [11:0] pipe_snd;
 
 assign      dout = { 4'hf, busy };
@@ -101,7 +101,8 @@ jt6295_ctrl u_ctrl(
 
     .start      ( start         ),
     .stop       ( stop          ),
-    .busy       ( busy          )
+    .busy       ( busy          ),
+    .zero       ( zero          )
 );
 
 jt6295_serial u_serial(
@@ -116,6 +117,7 @@ jt6295_serial u_serial(
     .start      ( start         ),
     .stop       ( stop          ),    
     .busy       ( busy          ),
+    .zero       ( zero          ),
     // ADPCM data feed    
     .rom_addr   ( ch_addr       ),
     .rom_data   ( ch_data       ),
