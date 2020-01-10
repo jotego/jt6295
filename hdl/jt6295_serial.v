@@ -37,12 +37,12 @@ module jt6295_serial(
     output reg [ 3:0]   pipe_data
 );
 
-reg  [ 3:0] ch, start_latch, start_csr;
+(*keep*) reg  [ 3:0] ch, start_latch, start_csr;
 wire [ 3:0] att_in, att_out;
 wire [18:0] cnt, cnt_next, cnt_in;
 wire [17:0] ch_end, stop_in, stop_out;
-wire        update = start_latch[0] & ~start_csr[0];
-wire        over, busy_in, busy_out;
+(*keep*) wire        update = start_latch[0] & ~start_csr[0];
+(*keep*) wire        over, busy_in, busy_out;
 assign      cnt_next = busy_out ? cnt+19'd1 : cnt;
 
 // Busy
@@ -61,8 +61,10 @@ end
 always @(posedge clk, posedge rst) begin
     if(rst)
         ch <= 4'b1;
-    else if(cen4)
-        ch <= { ch[0], ch[3:1]  };
+    else begin
+        if(cen4) ch <= { ch[0], ch[3:1]  };
+        if(cen)  ch <= 4'b0001; // keep it sync'ed with the start_latch
+    end
 end
 
 // 

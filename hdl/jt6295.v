@@ -84,7 +84,7 @@ jt6295_rom u_rom(
 jt6295_ctrl u_ctrl(
     .rst        ( rst           ),
     .clk        ( clk           ),
-    .cen        ( cen_sr        ),
+    .cen4       ( cen_sr4       ),
     // CPU
     .wrn        ( wrn           ),
     .din        ( din           ),
