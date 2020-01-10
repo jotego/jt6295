@@ -122,10 +122,16 @@ wire signed [16:0] mul_VI = snd_VI * gain_VI; // multipliers are abundant
 
 assign snd_in = !en_V ? 12'd0 : (sign_V ? snd_out - qn_V : snd_out + qn_V);
 
-always @(posedge clk) if(cen) begin
-    snd_VI  <= snd_in;
-    gain_VI <= gain_lut[att_V];
-    sound   <= mul_VI[16:5];
+always @(posedge clk, posedge rst) begin
+    if(rst) begin
+        snd_VI  <= 12'd0;
+        gain_VI <= 7'd0;
+        sound   <= 12'd0;
+    end else if(cen) begin
+        snd_VI  <= snd_in;
+        gain_VI <= gain_lut[att_V];
+        sound   <= mul_VI[16:5];
+    end
 end
 
 jt6295_sh_rst #(.WIDTH(12), .STAGES(4) ) u_sound
