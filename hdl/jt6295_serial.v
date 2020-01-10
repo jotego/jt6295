@@ -42,10 +42,11 @@ module jt6295_serial(
 wire [ 3:0] att_in, att_out;
 wire [18:0] cnt, cnt_next, cnt_in;
 wire [17:0] ch_end, stop_in, stop_out;
-(*keep*) wire        update = start_latch[0] & ~start_csr[0];
-(*keep*) wire        over, busy_in, busy_out;
-assign      cnt_next = busy_out ? cnt+19'd1 : cnt;
-assign      zero     = ch[3];
+(*keep*) wire update;
+(*keep*) wire over, busy_in, busy_out;
+assign update   = start_latch[0] & ~start_csr[0];
+assign cnt_next = busy_out ? cnt+19'd1 : cnt;
+assign zero     = ch[3];
 
 // Busy
 always @(posedge clk, posedge rst) begin

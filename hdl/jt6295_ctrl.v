@@ -81,7 +81,10 @@ end
 reg [17:0] new_start;
 reg [17:8] new_stop;
 reg [ 2:0] st;
+reg [ 3:0] last_busy;
 reg        wrom;
+
+wire [3:0] busy_negedge = ~(~busy & last_busy);
 
 assign rom_addr = { phrase, st };
 
@@ -94,7 +97,9 @@ always @(posedge clk) begin
         stop_addr  <= 18'd0;
         rom_cs <= 1'b0;
         start  <= 4'd0;
+        last_busy <= 4'd0;
     end else begin
+        last_busy <= busy;
         if(st!=3'd7) begin
             wrom <= 1'b0;
             if( !wrom && rom_ok ) begin
@@ -104,10 +109,10 @@ always @(posedge clk) begin
         end
         case(st)
             3'd7: begin
+                start  <= start & busy_negedge;
                 if(pull) begin
                     st       <= 3'd0;
                     wrom     <= 1'b1;
-                    start    <= start & busy; // 4'd0;
                     rom_cs   <= 1'b1;
                 end
             end
