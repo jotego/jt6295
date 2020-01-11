@@ -38,7 +38,7 @@ module jt6295_serial(
     output reg [ 3:0]   pipe_data
 );
 
-(*keep*) reg  [ 3:0] ch, start_latch, start_csr;
+(*keep*) reg  [ 3:0] ch, start_latch, start_csr, stop_csr, stop_latch;
 wire [ 3:0] att_in, att_out;
 wire [18:0] cnt, cnt_next, cnt_in;
 wire [17:0] ch_end, stop_in, stop_out;
@@ -79,6 +79,9 @@ always @(posedge clk, posedge rst) begin
     end else if(cen4) begin        
         start_csr   <= { start_latch[0], start_csr[3:1] };
         start_latch <= zero ? start : start_latch >> 1;
+
+        stop_csr   <= { stop_latch[0], stop_csr[3:1] };
+        stop_latch <= zero ? stop : stop_latch >> 1;
     end
 end
 
@@ -94,7 +97,7 @@ assign csr_in = { stop_in, cnt_in, att_in, busy_in };
 assign {stop_out, cnt, att_out, busy_out } = csr_out;
 assign rom_addr = cnt[18:1];
 assign over     = rom_addr >= stop_out;
-assign busy_in  = update | ( busy_out & ~over );
+assign busy_in  = update | ( busy_out & ~over & ~stop_csr[0]);
 
 jt6295_sh_rst #(.WIDTH(CSRW), .STAGES(4) ) u_cnt
 (
