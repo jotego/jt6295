@@ -60,7 +60,7 @@ always @(posedge clk) begin
         stop <= 4'd0;
         ch   <= 4'd0;
     end else begin
-        pull <= 1'b0;
+        if(zero) pull <= 1'b0;
         if( posedge_wrn  ) begin // new write
             if( cmd ) begin // 2nd byte
                 ch      <= din[7:4];
@@ -82,7 +82,7 @@ reg [17:0] new_start;
 reg [17:8] new_stop;
 reg [ 2:0] st;
 reg [ 3:0] last_busy;
-reg        wrom;
+reg        wrom, wzero;
 
 wire [3:0] busy_negedge = ~(~busy & last_busy);
 
@@ -98,19 +98,20 @@ always @(posedge clk) begin
         rom_cs <= 1'b0;
         start  <= 4'd0;
         last_busy <= 4'd0;
+        wzero     <= 1'b0;
     end else begin
-        last_busy <= busy;
+        if(zero) last_busy <= busy;
         if(st!=3'd7) begin
             wrom <= 1'b0;
             if( !wrom && rom_ok ) begin
-                st   <= st+3'd1;
+                st <= st+3'd1;
                 wrom <= 1'b1;
             end
         end
         case(st)
             3'd7: begin
                 start  <= start & busy_negedge;
-                if(pull) begin
+                if(pull&&zero) begin
                     st       <= 3'd0;
                     wrom     <= 1'b1;
                     rom_cs   <= 1'b1;
@@ -127,6 +128,7 @@ always @(posedge clk) begin
                 stop_addr   <= {new_stop[17:8], rom_data} ;
                 att         <= new_att;
                 rom_cs      <= 1'b0;
+                wzero       <= 1'b1;
             end
         endcase
     end
