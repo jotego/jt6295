@@ -61,17 +61,43 @@ end
 
 integer cnt=0, wrst=0, aux;
 
-reg [7:0] cmd[0:63];
+reg [7:0] cmd[0:127];
+reg [6:0] subcnt;
 
 initial begin
-    for( aux=0; aux<64; aux=aux+1) cmd[aux] = 8'd0; // wait
+    for( aux=0; aux<128; aux=aux+1) cmd[aux] = 8'd0; // wait
 
     cmd[0] = 8'h78; // suspend all channels
     //cmd[1] = 8'h81; // phrase 1
-    cmd[2] = 8'h10; // channel 0
-    cmd[1] = 8'h94; // phrase 17
+    cmd[2] = 8'h94; // phrase 17
+    cmd[3] = 8'h10; // channel 1
+
+    cmd[4] = 8'h94; // phrase 
+    cmd[5] = 8'h20; // channel 2
+
+    cmd[6] = 8'h94; // phrase 
+    cmd[7] = 8'h40; // channel 2
+
+    cmd[8] = 8'h94; // phrase 
+    cmd[9] = 8'h80; // channel 2
+
+
    // cmd[2] = 8'h20; // channel 1
-    cmd[63] = 8'h01; // finish
+    cmd[60] = 8'b0_0001_000; // stop channel 1
+    cmd[62] = 8'b0_0010_000; // stop channel 1
+    cmd[64] = 8'b0_0100_000; // stop channel 1
+    cmd[66] = 8'b0_1000_000; // stop channel 1
+
+    cmd[68] = 8'h94; // phrase 
+    cmd[69] = 8'h80; // channel 2
+
+    cmd[74] = 8'b0_1000_000; // stop channel
+
+    cmd[76] = 8'h94; // phrase 
+    cmd[77] = 8'h80; // channel 2
+
+
+    cmd[90] = 8'h01; // finish
 end
 
 always @(posedge clk, posedge rst) begin
@@ -79,6 +105,7 @@ always @(posedge clk, posedge rst) begin
         wrst <= 0;
         din  <= 8'd0;
         cnt  <= 0;
+        subcnt<=0;
         wrn  <= 1;
     end else begin
         case( wrst )
@@ -94,14 +121,17 @@ always @(posedge clk, posedge rst) begin
                 endcase
             end
             1: begin
-                cnt <= cnt+1;
-                wrn <= 1'b1;
+                subcnt<=subcnt+1;
                 wrst <= 0;
+                if(&subcnt) begin
+                    cnt <= cnt+1;
+                    wrn <= 1'b1;
+                end
             end
 
             9: begin   // wait
-                cnt <= cnt+1;          
-                #20_000_000 wrst <= 0;
+                cnt <= cnt+1;
+                #20_00_000 wrst <= 0;
             end
             10: #10_000 $finish;
         endcase

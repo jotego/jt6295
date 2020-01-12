@@ -20,6 +20,7 @@ module jt6295_ctrl(
     input                  rst,
     input                  clk,
     input                  cen4,
+    input                  cen1,
     // CPU
     input                  wrn,
     input      [ 7:0]      din,
@@ -53,14 +54,23 @@ always @(posedge clk) begin
     last_wrn <= wrn;
 end
 
+reg stop_clr;
+
+wire zero1 = zero & cen1;
+
 // Bus interface
 always @(posedge clk) begin
     if( rst ) begin
-        cmd  <= 1'b0;
-        stop <= 4'd0;
-        ch   <= 4'd0;
+        cmd      <= 1'b0;
+        stop     <= 4'd0;
+        ch       <= 4'd0;
+        stop_clr <= 1'b0;
     end else begin
-        if(zero) pull <= 1'b0;
+        if(zero1) begin
+            pull <= 1'b0;
+            stop_clr <= |stop;
+            if( stop_clr ) stop<=4'd0;
+        end
         if( posedge_wrn  ) begin // new write
             if( cmd ) begin // 2nd byte
                 ch      <= din[7:4];
@@ -72,7 +82,7 @@ always @(posedge clk) begin
                 phrase <= din[6:0];
                 cmd    <= 1'b1; // wait for second byte
             end else begin // stop data
-                stop   <= din[7:4];
+                stop   <= din[6:3];
             end
         end
     end
@@ -111,7 +121,7 @@ always @(posedge clk) begin
         case(st)
             3'd7: begin
                 start  <= start & busy_negedge;
-                if(pull&&zero) begin
+                if(pull&&zero1) begin
                     st       <= 3'd0;
                     wrom     <= 1'b1;
                     rom_cs   <= 1'b1;
