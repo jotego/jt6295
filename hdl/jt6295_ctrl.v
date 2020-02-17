@@ -46,7 +46,7 @@ wire posedge_wrn  = wrn && !last_wrn;
 
 // new request
 reg [6:0] phrase;
-reg       pull;
+reg       push, pull;
 reg [3:0] ch, new_att;
 reg       cmd;
 
@@ -56,7 +56,15 @@ end
 
 reg stop_clr;
 
-wire zero1 = zero & cen1;
+`ifdef JT6295_DUMP
+integer fdump;
+integer ticks=0;
+initial begin
+    fdump=$fopen("jt6295.log");
+end
+always @(posedge zero) ticks<=ticks+1;
+`endif
+
 
 // Bus interface
 always @(posedge clk) begin
@@ -64,14 +72,16 @@ always @(posedge clk) begin
         cmd      <= 1'b0;
         stop     <= 4'd0;
         ch       <= 4'd0;
-        stop_clr <= 1'b0;
+        pull     <= 1'b1;
     end else begin
-        if(zero1) begin
-            pull <= 1'b0;
-            stop_clr <= |stop;
-            if( stop_clr ) stop<=4'd0;
+        if( cen4 ) begin
+            stop <= stop & ~busy;
         end
+        if( push ) pull <= 1'b0;
         if( posedge_wrn  ) begin // new write
+            `ifdef JT6295_DUMP
+            $fwrite("@%d - %X\n", ticks, din);
+            `endif
             if( cmd ) begin // 2nd byte
                 ch      <= din[7:4];
                 new_att <= din[3:0];
@@ -81,6 +91,7 @@ always @(posedge clk) begin
             else if( din[7] ) begin // channel start
                 phrase <= din[6:0];
                 cmd    <= 1'b1; // wait for second byte
+                stop   <= 4'd0;
             end else begin // stop data
                 stop   <= din[6:3];
             end
@@ -109,6 +120,7 @@ always @(posedge clk) begin
         start  <= 4'd0;
         last_busy <= 4'd0;
         wzero     <= 1'b0;
+        push      <= 1'b0;
     end else begin
         if(zero) last_busy <= busy;
         if(st!=3'd7) begin
@@ -121,10 +133,11 @@ always @(posedge clk) begin
         case(st)
             3'd7: begin
                 start  <= start & busy_negedge;
-                if(pull&&zero1) begin
+                if(pull) begin
                     st       <= 3'd0;
                     wrom     <= 1'b1;
                     rom_cs   <= 1'b1;
+                    push     <= 1'b1;
                 end
             end
             3'd1: new_start[17:16] <= rom_data[1:0];
@@ -133,12 +146,13 @@ always @(posedge clk) begin
             3'd4: new_stop [17:16] <= rom_data[1:0];
             3'd5: new_stop [15: 8] <= rom_data;
             3'd6: begin
-                start       <= start | ch;
+                start       <= ch;
                 start_addr  <= new_start;
                 stop_addr   <= {new_stop[17:8], rom_data} ;
                 att         <= new_att;
                 rom_cs      <= 1'b0;
                 wzero       <= 1'b1;
+                push        <= 1'b0;
             end
         endcase
     end

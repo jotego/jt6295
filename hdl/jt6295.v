@@ -34,7 +34,7 @@ module jt6295(
 );
 
 wire        cen_sr;  // sampling rate
-wire        cen_sr4; // 4x sampling rate 
+wire        cen_sr4, cen_sr4b; // 4x sampling rate 
 
 wire [ 3:0] busy, start, stop;
 wire [17:0] start_addr, stop_addr ,
@@ -49,15 +49,16 @@ wire signed [11:0] pipe_snd;
 assign      dout = { 4'hf, busy };
 
 jt6295_timing u_timing(
-    .clk    ( clk       ),
-    .cen    ( cen       ),
-    .ss     ( ss        ),
-    .cen_sr ( cen_sr    ),
-    .cen_sr4( cen_sr4   )
+    .clk        ( clk       ),
+    .cen        ( cen       ),
+    .ss         ( ss        ),
+    .cen_sr     ( cen_sr    ),
+    .cen_sr4    ( cen_sr4   ),
+    .cen_sr4b   ( cen_sr4b  )
 );
 
 // ROM interface
-assign ch_cs = cen_sr4;
+assign ch_cs = cen_sr4b;
 
 jt6295_rom u_rom(
     .rst        ( rst           ),

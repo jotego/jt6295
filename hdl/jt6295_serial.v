@@ -38,27 +38,15 @@ module jt6295_serial(
     output reg [ 3:0]   pipe_data
 );
 
-(*keep*) reg  [ 3:0] ch, start_latch, start_csr, stop_csr, stop_latch;
+localparam CSRW = 18+19+4+1;
+
+reg  [ 3:0] ch;
 wire [ 3:0] att_in, att_out;
 wire [18:0] cnt, cnt_next, cnt_in;
 wire [17:0] ch_end, stop_in, stop_out;
-(*keep*) wire update;
-(*keep*) wire over, busy_in, busy_out;
-assign update   = start_latch[0] & ~start_csr[0];
-assign cnt_next = busy_out ? cnt+19'd1 : cnt;
-assign zero     = ch[3];
-
-// Busy
-always @(posedge clk, posedge rst) begin
-    if(rst)
-        busy <= 4'b0;
-    else if(cen4) begin
-        if( ch[0] ) busy[0] <= busy_in;
-        if( ch[1] ) busy[1] <= busy_in;
-        if( ch[2] ) busy[2] <= busy_in;
-        if( ch[3] ) busy[3] <= busy_in;
-    end
-end
+wire        update;
+wire        over, busy_in, busy_out, cont;
+reg         up_start, up_stop;
 
 // current channel
 always @(posedge clk, posedge rst) begin
@@ -70,66 +58,67 @@ always @(posedge clk, posedge rst) begin
     end
 end
 
-// 
+always @(*) begin
+    case( ch )
+        4'b0001: { up_start, up_stop } = { start[0], stop[0] };
+        4'b0010: { up_start, up_stop } = { start[1], stop[1] };
+        4'b0100: { up_start, up_stop } = { start[2], stop[2] };
+        4'b1000: { up_start, up_stop } = { start[3], stop[3] };
+        default: { up_start, up_stop } = 2'b00;
+    endcase
+end
 
-always @(posedge clk, posedge rst) begin
-    if(rst) begin
-        start_latch <= 4'b0;
-        start_csr   <= 4'b0;
-    end else if(cen4) begin        
-        start_csr   <= { start_latch[0], start_csr[3:1] };
-        start_latch <= zero ? start : start_latch >> 1;
-
-        stop_csr   <= { stop_latch[0], stop_csr[3:1] };
-        stop_latch <= zero ? stop : stop_latch >> 1;
+always @(posedge clk, posedge rst ) begin
+    if( rst ) begin
+        busy <= 4'd0;
+    end else begin
+        case( ch )
+            4'b0001: busy[0] <= busy_in;
+            4'b0010: busy[1] <= busy_in;
+            4'b0100: busy[2] <= busy_in;
+            4'b1000: busy[3] <= busy_in;
+            default: busy    <= 4'd0;
+        endcase
     end
 end
 
-assign stop_in = update ? stop_addr : stop_out;
-assign cnt_in  = update ? {start_addr, 1'b0} : cnt_next;
-assign att_in  = update ? att : att_out;
-
-localparam CSRW = 18+19+4+1;
+assign zero     = ch[0];
+assign update   = up_start | up_stop;
+assign cont     = busy_out & ~over;
+assign cnt_next = cont      ? cnt+19'd1 : cnt;
+assign stop_in  = up_start  ? stop_addr : stop_out;
+assign cnt_in   = up_start  ? {start_addr, 1'b0} : cnt_next;
+assign att_in   = up_start  ? att : att_out;
+assign busy_in  = update    ? (up_start & ~up_stop) : cont;
 
 wire [CSRW-1:0] csr_in, csr_out;
-
 assign csr_in = { stop_in, cnt_in, att_in, busy_in };
 assign {stop_out, cnt, att_out, busy_out } = csr_out;
 assign rom_addr = cnt[18:1];
 assign over     = rom_addr >= stop_out;
-assign busy_in  = update | ( busy_out & ~over & ~stop_csr[0]);
 
-jt6295_sh_rst #(.WIDTH(CSRW), .STAGES(4) ) u_cnt
-(
+jt6295_sh_rst #(.WIDTH(CSRW), .STAGES(4) ) u_cnt(
     .rst    ( rst       ),
     .clk    ( clk       ),
-    .clk_en ( cen4       ),
+    .clk_en ( cen4      ),
     .din    ( csr_in    ),
     .drop   ( csr_out   )
 );
 
 // Channel data is latched for a clock cycle to wait for ROM data
-reg       sel, en;
-reg [3:0] attx;
 
 always @(posedge clk, posedge rst) begin
     if(rst) begin
-        en       <= 1'b0;
-        sel      <= 1'b0;
         pipe_data<= 4'd0;
         pipe_en  <= 1'b0;
-        attx     <= 4'd0;
         pipe_att <= 4'd0;
     end else if(cen4) begin
         // data
-        sel       <= cnt[0];
-        pipe_data <= !sel ? rom_data[7:4] : rom_data[3:0];
+        pipe_data <= !cnt[0] ? rom_data[7:4] : rom_data[3:0];
         // attenuation
-        attx      <= att_out;
-        pipe_att  <= attx;
+        pipe_att  <= att_out;
         // busy / enable
-        en        <= busy_in;
-        pipe_en   <= en;
+        pipe_en   <= busy_out;
     end
 end
 

@@ -24,7 +24,8 @@ module jt6295_timing(
     input       cen,
     input       ss,
     output reg  cen_sr, // Sample rate
-    output reg  cen_sr4 // 4x sample rate
+    output reg  cen_sr4, // 4x sample rate
+    output reg  cen_sr4b // 4x sample rate, 180 shift
 );
 
 reg  [2:0] base=2'd0;
@@ -34,12 +35,14 @@ wire [2:0] lim = ss ? 3'h3 : 3'h4;
 
 always @(posedge clk) begin
     cen_sr4 <= 1'd0;
+    cen_sr4b<= 1'd0;
     cen_sr  <= 1'd0;
     if( cen ) begin
         base    <= (base==lim) ? 3'd0 : base+3'd1;
         if(base==3'd0) cnt <= (cnt==6'd32) ? 6'd0 : cnt+6'd1;
 
         cen_sr4 <= !cnt[5] && cnt[2:0] == 3'b000 && base == 3'd0;
+        cen_sr4b<= !cnt[5] && cnt[2:0] == 3'b100 && base == 3'd0;
         cen_sr  <= {cnt,base} == 9'd0;
     end
 end
