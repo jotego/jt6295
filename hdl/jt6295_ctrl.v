@@ -74,6 +74,7 @@ always @(posedge clk) begin
         stop     <= 4'd0;
         ch       <= 4'd0;
         pull     <= 1'b1;
+        phrase   <= 7'd0;
     end else begin
         if( cen4 ) begin
             stop <= stop & ~busy;

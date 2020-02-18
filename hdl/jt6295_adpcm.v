@@ -134,7 +134,8 @@ always @(*) begin
         extend(snd_out) + extend(qn_V));
 end
 
-assign snd_in = snd_V > lim_pos ? lim_pos : (snd_V < lim_neg ? lim_neg : snd_V);
+assign snd_in = snd_V > lim_pos ? lim_pos[11:0] : 
+    (snd_V < lim_neg ? lim_neg[11:0] : snd_V[11:0]);
 
 always @(posedge clk, posedge rst) begin
     if(rst) begin

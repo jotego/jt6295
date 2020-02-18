@@ -11,7 +11,7 @@ wire ss = 1'b1;
 wire [17:0] rom_addr;
 reg  [17:0] rom_last;
 reg  [ 7:0] rom_data;
-wire        rom_ok = rom_last == rom_addr;
+wire        rom_ok = rom_last === rom_addr;
 wire signed [13:0] sound;
 reg         wrn=1'b1;
 reg  [ 7:0] din;
@@ -69,33 +69,8 @@ initial begin
 
     cmd[0] = 8'h78; // suspend all channels
     //cmd[1] = 8'h81; // phrase 1
-    cmd[2] = 8'h94; // phrase 17
-    cmd[3] = 8'h10; // channel 1
-
-    cmd[4] = 8'h94; // phrase 
-    cmd[5] = 8'h20; // channel 2
-
-    cmd[6] = 8'h94; // phrase 
-    cmd[7] = 8'h40; // channel 2
-
-    cmd[8] = 8'h94; // phrase 
-    cmd[9] = 8'h80; // channel 2
-
-
-   // cmd[2] = 8'h20; // channel 1
-    cmd[60] = 8'b0_0001_000; // stop channel 1
-    cmd[62] = 8'b0_0010_000; // stop channel 1
-    cmd[64] = 8'b0_0100_000; // stop channel 1
-    cmd[66] = 8'b0_1000_000; // stop channel 1
-
-    cmd[68] = 8'h94; // phrase 
-    cmd[69] = 8'h80; // channel 2
-
-    cmd[74] = 8'b0_1000_000; // stop channel
-
-    cmd[76] = 8'h94; // phrase 
-    cmd[77] = 8'h80; // channel 2
-
+    cmd[2] = 8'hc3; // phrase 17
+    cmd[3] = 8'h13; // channel 1
 
     cmd[90] = 8'h01; // finish
 end
