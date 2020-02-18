@@ -38,6 +38,7 @@ module jt6295_ctrl(
     output reg [ 3:0]      start,
     output reg [ 3:0]      stop,
     input      [ 3:0]      busy,
+    input      [ 3:0]      ack,
     input                  zero
 );
 
@@ -105,7 +106,7 @@ reg [ 2:0] st;
 reg [ 3:0] last_busy;
 reg        wrom, wzero;
 
-wire [3:0] busy_negedge = ~(~busy & last_busy);
+wire [3:0] busy_posedge = busy & ~last_busy;
 
 assign rom_addr = { phrase, st };
 
@@ -122,7 +123,7 @@ always @(posedge clk) begin
         wzero     <= 1'b0;
         push      <= 1'b0;
     end else begin
-        if(zero) last_busy <= busy;
+        if(cen4) last_busy <= busy;
         if(st!=3'd7) begin
             wrom <= 1'b0;
             if( !wrom && rom_ok ) begin
@@ -132,7 +133,7 @@ always @(posedge clk) begin
         end
         case(st)
             3'd7: begin
-                start  <= start & busy_negedge;
+                start  <= start & ~ack;
                 if(pull) begin
                     st       <= 3'd0;
                     wrom     <= 1'b1;

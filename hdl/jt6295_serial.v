@@ -28,6 +28,7 @@ module jt6295_serial(
     input      [ 3:0]   start,
     input      [ 3:0]   stop,
     output reg [ 3:0]   busy,
+    output reg [ 3:0]   ack,
     output              zero,
     // ADPCM data feed    
     output     [17:0]   rom_addr,
@@ -68,6 +69,8 @@ always @(*) begin
     endcase
 end
 
+reg [17:0] cnt0, cnt1, cnt2, cnt3;
+
 always @(posedge clk, posedge rst ) begin
     if( rst ) begin
         busy <= 4'd0;
@@ -79,6 +82,23 @@ always @(posedge clk, posedge rst ) begin
             4'b1000: busy[3] <= busy_in;
             default: busy    <= 4'd0;
         endcase
+        if( cen4 ) begin
+            case( ch )
+                4'b0001: ack <= up_start ? ch : 4'b0;
+                4'b0010: ack <= up_start ? ch : 4'b0;
+                4'b0100: ack <= up_start ? ch : 4'b0;
+                4'b1000: ack <= up_start ? ch : 4'b0;
+                default: ack <= 4'd0;
+            endcase
+        end
+        `ifdef SIMULATION
+        case( ch )
+            4'b0001: cnt0 <= cnt>>1;
+            4'b0010: cnt1 <= cnt>>1;
+            4'b0100: cnt2 <= cnt>>1;
+            4'b1000: cnt3 <= cnt>>1;
+        endcase        
+        `endif
     end
 end
 

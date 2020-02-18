@@ -36,7 +36,7 @@ module jt6295(
 wire        cen_sr;  // sampling rate
 wire        cen_sr4, cen_sr4b; // 4x sampling rate 
 
-wire [ 3:0] busy, start, stop;
+wire [ 3:0] busy, ack, start, stop;
 wire [17:0] start_addr, stop_addr ,
             ch_addr;
 wire [ 9:0] ctrl_addr;
@@ -104,6 +104,7 @@ jt6295_ctrl u_ctrl(
     .start      ( start         ),
     .stop       ( stop          ),
     .busy       ( busy          ),
+    .ack        ( ack           ),
     .zero       ( zero          )
 );
 
@@ -119,6 +120,7 @@ jt6295_serial u_serial(
     .start      ( start         ),
     .stop       ( stop          ),    
     .busy       ( busy          ),
+    .ack        ( ack           ),
     .zero       ( zero          ),
     // ADPCM data feed    
     .rom_addr   ( ch_addr       ),

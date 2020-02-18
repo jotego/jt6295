@@ -109,7 +109,7 @@ jt6295_sh_rst #(.WIDTH(4), .STAGES(4) ) u_att
     .clk    ( clk       ),
     .clk_en ( cen       ),
     .din    ( att       ),
-    .drop   ( att_V    )
+    .drop   ( att_V     )
 );
 
 
@@ -119,8 +119,22 @@ reg  signed [ 7:0] gain_lut[0:15];
 reg  signed [ 6:0] gain_VI; // leave the MSB for the sign
 wire signed [16:0] mul_VI = snd_VI * gain_VI; // multipliers are abundant
     // in the FPGA, so I just use one.
+reg  signed [12:0] snd_V;
 
-assign snd_in = !en_V ? 12'd0 : (sign_V ? snd_out - qn_V : snd_out + qn_V);
+wire signed [12:0] lim_pos =  13'd2047;
+wire signed [12:0] lim_neg = -13'd2048;
+
+function [12:0] extend;
+    input [11:0] a;
+    extend = { a[11], a };
+endfunction
+
+always @(*) begin
+    snd_V = !en_V ? 13'd0 : (sign_V ? extend(snd_out) - extend(qn_V) : 
+        extend(snd_out) + extend(qn_V));
+end
+
+assign snd_in = snd_V > lim_pos ? lim_pos : (snd_V < lim_neg ? lim_neg : snd_V);
 
 always @(posedge clk, posedge rst) begin
     if(rst) begin
@@ -142,12 +156,6 @@ jt6295_sh_rst #(.WIDTH(12), .STAGES(4) ) u_sound
     .din    ( snd_in    ),
     .drop   ( snd_out   )
 );
-
-`ifdef SIMULATION
-reg signed [11:0] ch0;
-
-always @(posedge clk) if(en)  ch0 <= snd_in;
-`endif
 
 initial begin
 lut[ 0] = 11'd0016; lut[ 1] = 11'd0017; lut[ 2] = 11'd0019; lut[ 3] = 11'd0021; lut[ 4] = 11'd0023; lut[ 5] = 11'd0025; lut[ 6] = 11'd0028; 
@@ -173,5 +181,24 @@ initial begin
     gain_lut[12] = 7'd0; gain_lut[13] = 8'd0; gain_lut[14] = 8'd0; 
     gain_lut[15] = 7'd0; 
 end
+
+`ifdef SIMULATION
+reg signed [11:0] snd0, snd1, snd2, snd3;
+reg        [ 3:0] ch;
+
+always @(posedge clk, posedge rst) begin
+    if( rst ) ch <= 4'b1;
+    else if(cen) ch <= { ch[2:0], ch[3] };
+end
+
+always @(posedge clk) if(cen) begin
+    case(ch)
+        4'd1: snd0 <= snd_in;
+        4'd2: snd1 <= snd_in;
+        4'd4: snd2 <= snd_in;
+        4'd8: snd3 <= snd_in;
+    endcase
+end
+`endif
 
 endmodule
