@@ -130,8 +130,8 @@ function [12:0] extend;
 endfunction
 
 always @(*) begin
-    snd_V = !en_V ? 13'd0 : (sign_V ? extend(snd_out) - extend(qn_V) : 
-        extend(snd_out) + extend(qn_V));
+    snd_V = !en_V ? -13'd2 : (sign_V ? extend(snd_out) - { 1'b0, qn_V }  : 
+                                      extend(snd_out) + { 1'b0, qn_V } );
 end
 
 assign snd_in = snd_V > lim_pos ? lim_pos[11:0] : 

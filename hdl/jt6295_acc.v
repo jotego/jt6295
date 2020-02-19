@@ -44,7 +44,7 @@ always @(posedge clk, posedge rst) begin
         sum <= acc;
     end
 end
-
+/*
 jt12_interpol #(.calcw(14+4), .inw(14), 
     .n(2),    // number of stages
     .m(2),    // depth of comb filter
@@ -57,5 +57,6 @@ jt12_interpol #(.calcw(14+4), .inw(14),
     .snd_in     ( sum       ),
     .snd_out    ( sound_out )
 );
-
+*/
+assign sound_out = sum;
 endmodule
