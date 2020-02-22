@@ -80,12 +80,12 @@ always @(posedge clk, posedge rst) begin
             if( slot0_cs ) begin
                 rom_addr     <= slot0_addr;
                 datasel[1:0] <= 2'b01;
-                okdly        <= 1'b0;
+                okdly        <= 3'b0;
             end else
             if( slot1_cs ) begin
                 rom_addr     <= slot1_addr;
                 datasel[1:0] <= 2'b10;
-                okdly        <= 1'b0;
+                okdly        <= 3'b0;
             end
         end
     end
