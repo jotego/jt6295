@@ -16,81 +16,62 @@
     Version: 1.0
     Date: 6-1-2020 */
 
-// slot 0 has priority over slot1
+// Each sampling period is divided into 4 regions, one per channel
+// each region is further divided into 8 time slots for memory access
+// of those, 2 are used for ADPCM data. Those 2 are in the middle of
+// the region, so data will be ready for next cen4 pulse. No adpcm_ok
+// signal is generated. Data is assumed to be right after two cen32 pulses
+// 
+// The other 6 regions are used for control data. Ok signals are generated
+// and use to gate the progress of the control state machine
 
 module jt6295_rom(
     input             rst,
     input             clk,
+    input             cen4,
+    input             cen32,
 
-    input             slot0_cs,
-    input             slot1_cs,
+    input      [17:0] adpcm_addr,
+    input      [17:0] ctrl_addr,
 
-    input      [17:0] slot0_addr,
-    input      [17:0] slot1_addr,
+    output reg [ 7:0] adpcm_dout,
+    output reg [ 7:0] ctrl_dout,
 
-    output reg [ 7:0] slot0_dout,
-    output reg [ 7:0] slot1_dout,
-
-    output reg        slot0_ok,
-    output reg        slot1_ok,
+    output reg        ctrl_ok,
     // ROM interface
     output reg [17:0] rom_addr,
     input      [ 7:0] rom_data,
     input             rom_ok
 );
 
-reg [ 1:0] datasel;
-reg [17:0] last0, last1;
-reg [ 2:0] okdly;
-wire       rom_good = &{okdly, rom_ok};
+reg [7:0] st;
+reg [1:0] wait2;
 
-always @(posedge clk, posedge rst) begin
-    if( rst ) begin
-        rom_addr <= 18'd0;
-        datasel  <= 2'b0;
-        last0    <= 18'd0;  // these are invalid ROM addresses
-        last1    <= 18'd0;
-        slot0_dout <= 8'd0;
-        slot1_dout <= 8'd0;
-        okdly      <= 1'b0;
-    end else begin
-        okdly <= { okdly[1:0], rom_ok };
-        if( last0 != slot0_addr ) slot0_ok <= 1'b0;
-        if( last1 != slot1_addr ) slot1_ok <= 1'b0;
-
-        if( (datasel && rom_good) ) begin
-            datasel <= 2'b0;
-
-            if(datasel[0]) begin
-                last0      <= slot0_addr;
-                slot0_dout <= rom_data;
-                slot0_ok   <= 1'b1;
-            end
-            
-            if(datasel[1]) begin
-                last1      <= slot1_addr;
-                slot1_dout <= rom_data;
-                slot1_ok   <= 1'b1;
-            end
-        end
-
-        if( datasel==2'b0 ) begin
-            if( slot0_cs ) slot0_ok <= 1'b0;
-            if( slot1_cs ) slot1_ok <= 1'b0;
-            if( slot0_cs ) begin
-                rom_addr     <= slot0_addr;
-                datasel[1:0] <= 2'b01;
-                okdly        <= 3'b0;
-            end else
-            if( slot1_cs ) begin
-                rom_addr     <= slot1_addr;
-                datasel[1:0] <= 2'b10;
-                okdly        <= 3'b0;
-            end
-        end
-    end
+always @(posedge clk) begin
+    if(cen4 ) st <= 8'h80;
+    else if(cen32) st <= { st[6:0], st[7] };
 end
 
+always @(posedge clk) begin
+    case(st)
+        8'b1,8'b10: begin
+            rom_addr   <= adpcm_addr;
+            adpcm_dout <= rom_data;
+            ctrl_ok    <= 1'b0;
+            wait2      <= 2'b0;
+        end
+        default: begin
+            rom_addr   <= ctrl_addr;
+            // right after coming in rom_ok will still
+            // represent the status for adpcm data
+            if(wait2==2'b11) begin
+                ctrl_ok <= rom_ok;
+                ctrl_dout  <= rom_data;
+            end
+            wait2      <= {wait2[0],1'b1};
+        end
+    endcase
+end
 
 
 endmodule

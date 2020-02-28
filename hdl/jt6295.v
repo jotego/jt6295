@@ -35,6 +35,7 @@ module jt6295(
 
 wire        cen_sr;  // sampling rate
 wire        cen_sr4, cen_sr4b; // 4x sampling rate 
+wire        cen_sr32; // 32x sampling rate
 
 wire [ 3:0] busy, ack, start, stop;
 wire [17:0] start_addr, stop_addr ,
@@ -54,7 +55,8 @@ jt6295_timing u_timing(
     .ss         ( ss        ),
     .cen_sr     ( cen_sr    ),
     .cen_sr4    ( cen_sr4   ),
-    .cen_sr4b   ( cen_sr4b  )
+    .cen_sr4b   ( cen_sr4b  ),
+    .cen_sr32   ( cen_sr32  )
 );
 
 // ROM interface
@@ -63,17 +65,16 @@ assign ch_cs = cen_sr4b;
 jt6295_rom u_rom(
     .rst        ( rst           ),
     .clk        ( clk           ),
-    .slot0_cs   ( ch_cs         ),
-    .slot1_cs   ( ctrl_cs       ),
+    .cen4       ( cen_sr4       ),
+    .cen32      ( cen_sr32      ),
     // Each parallel accessing device
-    .slot0_addr ( ch_addr       ),
-    .slot1_addr ( { 8'd0, ctrl_addr } ),
+    .adpcm_addr ( ch_addr       ),
+    .ctrl_addr  ( { 8'd0, ctrl_addr } ),
     // Data
-    .slot0_dout ( ch_data       ),
-    .slot1_dout ( ctrl_data     ),
+    .adpcm_dout ( ch_data       ),
+    .ctrl_dout  ( ctrl_data     ),
     // Ok
-    .slot0_ok   (               ),
-    .slot1_ok   ( ctrl_ok       ),
+    .ctrl_ok    ( ctrl_ok       ),
     // ROM interface
     .rom_addr   ( rom_addr      ),
     .rom_data   ( rom_data      ),
@@ -99,7 +100,6 @@ jt6295_ctrl u_ctrl(
     .rom_addr   ( ctrl_addr     ),
     .rom_data   ( ctrl_data     ),
     .rom_ok     ( ctrl_ok       ),
-    .rom_cs     ( ctrl_cs       ),
 
     .start      ( start         ),
     .stop       ( stop          ),

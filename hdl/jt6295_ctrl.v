@@ -31,7 +31,6 @@ module jt6295_ctrl(
     output reg [ 3:0]      att,
     // ROM interface
     output     [ 9:0]      rom_addr,
-    output reg             rom_cs,
     input      [ 7:0]      rom_data,    
     input                  rom_ok,
     // flow control
@@ -118,7 +117,6 @@ always @(posedge clk) begin
         att <= 4'd0;
         start_addr <= 18'd0;
         stop_addr  <= 18'd0;
-        rom_cs <= 1'b0;
         start  <= 4'd0;
         last_busy <= 4'd0;
         wzero     <= 1'b0;
@@ -138,7 +136,6 @@ always @(posedge clk) begin
                 if(pull) begin
                     st       <= 3'd0;
                     wrom     <= 1'b1;
-                    rom_cs   <= 1'b1;
                     push     <= 1'b1;
                 end
             end
@@ -152,7 +149,6 @@ always @(posedge clk) begin
                 start_addr  <= new_start;
                 stop_addr   <= {new_stop[17:8], rom_data} ;
                 att         <= new_att;
-                rom_cs      <= 1'b0;
                 wzero       <= 1'b1;
                 push        <= 1'b0;
             end
