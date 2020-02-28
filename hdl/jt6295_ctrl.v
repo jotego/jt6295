@@ -102,13 +102,13 @@ end
 
 reg [17:0] new_start;
 reg [17:8] new_stop;
-reg [ 2:0] st;
+reg [ 2:0] st, addr_lsb;
 reg [ 3:0] last_busy;
 reg        wrom, wzero;
 
 wire [3:0] busy_posedge = busy & ~last_busy;
 
-assign rom_addr = { phrase, st };
+assign rom_addr = { phrase, addr_lsb };
 
 // Request phrase address
 always @(posedge clk) begin
@@ -121,24 +121,28 @@ always @(posedge clk) begin
         last_busy <= 4'd0;
         wzero     <= 1'b0;
         push      <= 1'b0;
+        addr_lsb  <= 3'b0;
     end else begin
         if(cen4) last_busy <= busy;
         if(st!=3'd7) begin
             wrom <= 1'b0;
             if( !wrom && rom_ok ) begin
-                st <= st+3'd1;
-                wrom <= 1'b1;
+                st       <= st+3'd1;
+                addr_lsb <= st;
+                wrom     <= 1'b1;
             end
         end
         case(st)
             3'd7: begin
-                start  <= start & ~ack;
+                start    <= start & ~ack;
+                addr_lsb <= 3'd0;
                 if(pull) begin
                     st       <= 3'd0;
                     wrom     <= 1'b1;
                     push     <= 1'b1;
                 end
             end
+            3'd0:;
             3'd1: new_start[17:16] <= rom_data[1:0];
             3'd2: new_start[15: 8] <= rom_data;
             3'd3: new_start[ 7: 0] <= rom_data;

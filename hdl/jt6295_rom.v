@@ -52,6 +52,8 @@ always @(posedge clk) begin
     else if(cen32) st <= { st[6:0], st[7] };
 end
 
+wire new_addr = rom_addr != ctrl_addr;
+
 always @(posedge clk) begin
     case(st)
         8'b1,8'b10: begin
@@ -64,14 +66,16 @@ always @(posedge clk) begin
             rom_addr   <= ctrl_addr;
             // right after coming in rom_ok will still
             // represent the status for adpcm data
-            if(wait2==2'b11) begin
-                ctrl_ok <= rom_ok;
-                ctrl_dout  <= rom_data;
-            end
-            wait2      <= {wait2[0],1'b1};
+            if(wait2==2'b11 && !new_addr) begin
+                ctrl_ok   <= rom_ok;
+                ctrl_dout <= rom_data;
+            end else ctrl_ok <= 1'b0;
+            if( new_addr )
+                wait2 <= 2'b0;
+            else
+                wait2 <= {wait2[0],1'b1};
         end
     endcase
 end
-
 
 endmodule
