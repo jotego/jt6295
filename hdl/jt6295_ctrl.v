@@ -76,7 +76,7 @@ always @(posedge clk) begin
         phrase   <= 7'd0;
     end else begin
         if( cen4 ) begin
-            stop <= stop & ~busy;
+            stop <= stop & busy;
         end
         if( push ) pull <= 1'b0;
         if( posedge_wrn  ) begin // new write
