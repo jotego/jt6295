@@ -47,7 +47,7 @@ wire [ 3:0] att, pipe_att;
 wire        ctrl_ok, ch_cs, ctrl_cs, zero;
 wire signed [11:0] pipe_snd;
 
-assign      dout = { 4'hf, busy };
+assign      dout = { 4'hf, busy | start };
 
 jt6295_timing u_timing(
     .clk        ( clk       ),
