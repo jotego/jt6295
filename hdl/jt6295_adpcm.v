@@ -115,7 +115,7 @@ jt6295_sh_rst #(.WIDTH(4), .STAGES(4) ) u_att
 
 wire signed [11:0] snd_in, snd_out;
 reg  signed [11:0] snd_VI;
-reg  signed [ 7:0] gain_lut[0:15];
+reg  signed [ 6:0] gain_lut[0:15];
 reg  signed [ 6:0] gain_VI; // leave the MSB for the sign
 wire signed [16:0] mul_VI = snd_VI * gain_VI; // multipliers are abundant
     // in the FPGA, so I just use one.

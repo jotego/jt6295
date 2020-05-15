@@ -104,7 +104,7 @@ reg [17:0] new_start;
 reg [17:8] new_stop;
 reg [ 2:0] st, addr_lsb;
 reg [ 3:0] last_busy;
-reg        wrom, wzero;
+reg        wrom;
 
 wire [3:0] busy_posedge = busy & ~last_busy;
 
@@ -119,7 +119,6 @@ always @(posedge clk) begin
         stop_addr  <= 18'd0;
         start  <= 4'd0;
         last_busy <= 4'd0;
-        wzero     <= 1'b0;
         push      <= 1'b0;
         addr_lsb  <= 3'b0;
     end else begin
@@ -153,7 +152,6 @@ always @(posedge clk) begin
                 start_addr  <= new_start;
                 stop_addr   <= {new_stop[17:8], rom_data} ;
                 att         <= new_att;
-                wzero       <= 1'b1;
                 push        <= 1'b0;
             end
         endcase

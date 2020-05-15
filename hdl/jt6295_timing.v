@@ -30,7 +30,7 @@ module jt6295_timing(
 );
 
 reg  [2:0] base=2'd0;
-reg  [5:0] cnt =8'd0;
+reg  [5:0] cnt =6'd0;
 wire [2:0] lim = ss ? 3'h3 : 3'h4;
 
 

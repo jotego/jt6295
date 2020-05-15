@@ -44,7 +44,8 @@ wire [ 9:0] ctrl_addr;
 wire [ 7:0] ch_data, ctrl_data;
 wire [ 3:0] data0, data1, data2, data3, pipe_data;
 wire [ 3:0] att, pipe_att;
-wire        ctrl_ok, ch_cs, ctrl_cs, zero;
+wire        ctrl_ok, ctrl_cs, zero;
+wire        pipe_en;
 wire signed [11:0] pipe_snd;
 
 assign      dout = { 4'hf, busy | start };
@@ -60,7 +61,6 @@ jt6295_timing u_timing(
 );
 
 // ROM interface
-assign ch_cs = cen_sr4b;
 
 jt6295_rom u_rom(
     .rst        ( rst           ),
