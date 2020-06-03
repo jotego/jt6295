@@ -178,8 +178,8 @@ initial begin
     gain_lut[6]  = 7'd4;
     gain_lut[7]  = 7'd3;
     gain_lut[8]  = 7'd2; 
-    gain_lut[9]  = 7'd0; gain_lut[10] = 8'd0; gain_lut[11] = 8'd0; 
-    gain_lut[12] = 7'd0; gain_lut[13] = 8'd0; gain_lut[14] = 8'd0; 
+    gain_lut[9]  = 7'd0; gain_lut[10] = 7'd0; gain_lut[11] = 7'd0; 
+    gain_lut[12] = 7'd0; gain_lut[13] = 7'd0; gain_lut[14] = 7'd0; 
     gain_lut[15] = 7'd0; 
 end
 
