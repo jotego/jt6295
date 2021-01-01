@@ -44,6 +44,17 @@ The output data rate is 4x the expected from the ss pin as there is a 4x
 interpolator built in, which eases most of the high frequency aliasing of the
 signal.
 
+### ROM interface
+
+Port     | Direction | Meaning
+---------|-----------|----------------------------
+rom_cs   | output    | high when address is valid
+rom_addr | output    | Addres to be read
+rom_data | input     | Data read from address
+rom_ok   | input     | Data read is valid
+
+Note that rom_ok is not valid for the clock cycle immediately after rising rom_cs. Or if rom_addr is changed while rom_cs is high. rom_addr must be stable once rom_cs goes high until rom_ok is asserted.
+
 ## FPGA arcade cores using this module:
 
 * [Double Dragon 2](https://github.com/jotego/jtdd), by the same author

@@ -37,6 +37,8 @@ int main(int argc, char *argv[]) {
             );
             return 0;
         }
+        printf("Unrecognized argument %s\n", argv[k]);
+        return 1;
     }
     if( argc < 2 || f==NULL) {
         printf("ERROR: expecting a file name as the ROM argument\n");
@@ -65,7 +67,7 @@ char *read_MRA(FILE *f) {
     rdcnt  = fread( off0, 1, 2, f );
     rdcnt += fread( off1, 1, 2, f );
     if( rdcnt!= 4 ) {
-        printf("Cannot read header from MRA file (%d bytes read)\n", rdcnt);
+        printf("Cannot read header from MRA file (%ld bytes read)\n", rdcnt);
         return NULL;
     }
     start = (off0[0]&0xff) | ((off0[1]&0xff)<<8);
@@ -97,7 +99,7 @@ char *read_ROM(FILE *f) {
     char *rom = malloc( 4*64*1024 );
     rdcnt = fread( rom, 1, 4*64*1024, f );
     if( rdcnt < 8*128 ) {
-        printf("Could not read the full header. Expecting 1024 bytes. Only %d bytes read\n", rdcnt);
+        printf("Could not read the full header. Expecting 1024 bytes. Only %ld bytes read\n", rdcnt);
         free(rom);
         return NULL;
     }
