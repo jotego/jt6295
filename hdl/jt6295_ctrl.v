@@ -26,12 +26,12 @@ module jt6295_ctrl(
     input      [ 7:0]      din,
     // Channel address
     output reg [17:0]      start_addr,
-    output reg [17:0]      stop_addr,   
+    output reg [17:0]      stop_addr,
     // Attenuation
     output reg [ 3:0]      att,
     // ROM interface
     output     [ 9:0]      rom_addr,
-    input      [ 7:0]      rom_data,    
+    input      [ 7:0]      rom_data,
     input                  rom_ok,
     // flow control
     output reg [ 3:0]      start,
@@ -63,6 +63,17 @@ initial begin
     fdump=$fopen("jt6295.log");
 end
 always @(posedge zero) ticks<=ticks+1;
+always @(posedge clk ) begin
+    if( posedge_wrn ) begin
+        if( !cmd && !din[7] ) begin
+            $fwrite(fdump,"@%0d - Mute %1X\n", ticks, din[6:3]);
+        end
+        if( cmd ) begin
+            $fwrite(fdump,"@%0d - Start %1X, phrase %X, Att %X\n",
+                ticks, din[7:4], phrase, din[3:0] );
+        end
+    end
+end
 `endif
 
 
@@ -80,9 +91,6 @@ always @(posedge clk) begin
         end
         if( push ) pull <= 1'b0;
         if( posedge_wrn  ) begin // new write
-            `ifdef JT6295_DUMP
-            $fwrite("@%d - %X\n", ticks, din);
-            `endif
             if( cmd ) begin // 2nd byte
                 ch      <= din[7:4];
                 new_att <= din[3:0];
