@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
             if( f==NULL) {
                 f=fopen(argv[k],"rb");
                 if( !f ) {
-                    printf("Cannot open file %s", argv[1]);
+                    printf("Cannot open file %s\n", argv[1]);
                     return 1;
                 }
             } else {
@@ -121,7 +121,7 @@ void dump( char *rom ) {
             continue;
         }
         if( start == end ) continue;
-        sprintf(fname,"dump_%x.oki",k);
+        sprintf(fname,"chunk_%x.bin",k);
         fout = fopen(fname,"wb");
         if( !fout ) {
             printf("Cannot create file %s\n", fname );

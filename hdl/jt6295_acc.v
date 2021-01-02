@@ -27,13 +27,17 @@ module jt6295_acc(
     output signed [13:0] sound_out
 );
 
+// Enabling the interpolator changes the sound of Chun Li's beat in
+// SF2 too much. So I decided to disable it
+parameter INTERPOL=0;
+
 reg signed [13:0] acc, sum;
 
 always @(posedge clk, posedge rst) begin
     if( rst ) begin
         acc <= 14'd0;
     end else if(cen4) begin
-        acc <= cen ? sound_in : acc + sound_in;        
+        acc <= cen ? sound_in : acc + sound_in;
     end
 end
 
@@ -45,20 +49,25 @@ always @(posedge clk, posedge rst) begin
     end
 end
 
-// If N is set to 2 there is too much filtering and 
-// some instruments won't be heard
-jt12_interpol #(.calcw(14+1), .inw(14), 
-    .n(1),    // number of stages
-    .m(2),    // depth of comb filter
-    .rate(4)  // it will stuff with as many as (rate-1) zeros
-) u_interpol(
-    .rst        ( rst       ),
-    .clk        ( clk       ),
-    .cen_in     ( cen       ),
-    .cen_out    ( cen4      ),
-    .snd_in     ( sum       ),
-    .snd_out    ( sound_out )
-);
+generate
+    if( INTERPOL) begin
+        // If N is set to 2 there is too much filtering and
+        // some instruments won't be heard
+        jt12_interpol #(.calcw(14+1), .inw(14),
+            .n(1),    // number of stages
+            .m(2),    // depth of comb filter
+            .rate(4)  // it will stuff with as many as (rate-1) zeros
+        ) u_interpol(
+            .rst        ( rst       ),
+            .clk        ( clk       ),
+            .cen_in     ( cen       ),
+            .cen_out    ( cen4      ),
+            .snd_in     ( sum       ),
+            .snd_out    ( sound_out )
+        );
+    end else begin
+        assign sound_out = sum;
+    end
+endgenerate
 
-//assign sound_out = sum;
 endmodule
