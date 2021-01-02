@@ -24,7 +24,8 @@ module jt6295_acc(
     input                cen,
     input                cen4,
     input  signed [11:0] sound_in,
-    output signed [13:0] sound_out
+    output signed [13:0] sound_out,
+    output               sample
 );
 
 // Enabling the interpolator changes the sound of Chun Li's beat in
@@ -65,8 +66,10 @@ generate
             .snd_in     ( sum       ),
             .snd_out    ( sound_out )
         );
+        assign sample    = cen4;
     end else begin
         assign sound_out = sum;
+        assign sample    = cen;
     end
 endgenerate
 

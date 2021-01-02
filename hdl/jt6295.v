@@ -19,7 +19,7 @@
 module jt6295(
     input                  rst,
     input                  clk,
-    input                  cen /* direct_enable */,        
+    input                  cen /* direct_enable */,
     input                  ss,        // ss pin: selects sample rate
     // CPU interface
     input                  wrn,  // active low
@@ -30,11 +30,12 @@ module jt6295(
     input         [ 7:0]   rom_data,
     input                  rom_ok,
     // Sound output
-    output signed [13:0]   sound
+    output signed [13:0]   sound,
+    output                 sample
 );
 
 wire        cen_sr;  // sampling rate
-wire        cen_sr4, cen_sr4b; // 4x sampling rate 
+wire        cen_sr4, cen_sr4b; // 4x sampling rate
 wire        cen_sr32; // 32x sampling rate
 
 wire [ 3:0] busy, ack, start, stop;
@@ -111,18 +112,18 @@ jt6295_ctrl u_ctrl(
 jt6295_serial u_serial(
     .rst        ( rst           ),
     .clk        ( clk           ),
-    .cen        ( cen_sr        ), 
+    .cen        ( cen_sr        ),
     .cen4       ( cen_sr4       ),
     // Flow
     .start_addr ( start_addr    ),
     .stop_addr  ( stop_addr     ),
     .att        ( att           ),
     .start      ( start         ),
-    .stop       ( stop          ),    
+    .stop       ( stop          ),
     .busy       ( busy          ),
     .ack        ( ack           ),
     .zero       ( zero          ),
-    // ADPCM data feed    
+    // ADPCM data feed
     .rom_addr   ( ch_addr       ),
     .rom_data   ( ch_data       ),
     // serialized data
@@ -134,7 +135,7 @@ jt6295_serial u_serial(
 jt6295_adpcm u_adpcm(
     .rst        ( rst           ),
     .clk        ( clk           ),
-    .cen        ( cen_sr4       ), 
+    .cen        ( cen_sr4       ),
     // serialized data
     .en         ( pipe_en       ),
     .att        ( pipe_att      ),
@@ -149,7 +150,8 @@ jt6295_acc u_acc(
     .cen4       ( cen_sr4       ),
     // serialized data
     .sound_in   ( pipe_snd      ),
-    .sound_out  ( sound         )
+    .sound_out  ( sound         ),
+    .sample     ( sample        )
 );
 
 `ifdef SIMULATION
