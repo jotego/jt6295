@@ -28,9 +28,7 @@ module jt6295_acc(
     output               sample
 );
 
-// Enabling the interpolator changes the sound of Chun Li's beat in
-// SF2 too much. So I decided to disable it
-parameter INTERPOL=0;
+parameter INTERPOL=1;
 
 reg signed [13:0] acc, sum;
 
@@ -52,21 +50,27 @@ end
 
 generate
     if( INTERPOL) begin
-        // If N is set to 2 there is too much filtering and
-        // some instruments won't be heard
-        jt12_interpol #(.calcw(14+1), .inw(14),
-            .n(1),    // number of stages
-            .m(2),    // depth of comb filter
-            .rate(4)  // it will stuff with as many as (rate-1) zeros
-        ) u_interpol(
+        // This module is in the JTFRAME repository https://github.com/jotego/jtframe
+
+        // Zero padding
+        reg  signed [15:0] fir_din;
+        wire signed [15:0] fir_dout;
+
+        assign sample    = cen4;
+        assign sound_out = fir_dout[14:1]; // gain the signal back up
+
+        always @(posedge clk) begin
+            if( cen4 ) fir_din <= cen ? { {2{sum[13]}}, sum } : 16'd0;
+        end
+
+
+        jtframe_fir_mono #(.COEFFS("jt6295_up4.hex"),.KMAX(69)) u_upfilter(
             .rst        ( rst       ),
             .clk        ( clk       ),
-            .cen_in     ( cen       ),
-            .cen_out    ( cen4      ),
-            .snd_in     ( sum       ),
-            .snd_out    ( sound_out )
+            .sample     ( cen4      ),
+            .din        ( fir_din   ),
+            .dout       ( fir_out   )
         );
-        assign sample    = cen4;
     end else begin
         assign sound_out = sum;
         assign sample    = cen;
