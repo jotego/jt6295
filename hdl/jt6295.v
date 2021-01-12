@@ -34,6 +34,8 @@ module jt6295(
     output                 sample
 );
 
+parameter INTERPOL=1;
+
 wire        cen_sr;  // sampling rate
 wire        cen_sr4, cen_sr4b; // 4x sampling rate
 wire        cen_sr32; // 32x sampling rate
@@ -143,7 +145,7 @@ jt6295_adpcm u_adpcm(
     .sound      ( pipe_snd      )
 );
 
-jt6295_acc u_acc(
+jt6295_acc #(.INTERPOL(INTERPOL)) u_acc(
     .rst        ( rst           ),
     .clk        ( clk           ),
     .cen        ( cen_sr        ),

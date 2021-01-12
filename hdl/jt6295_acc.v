@@ -57,10 +57,10 @@ generate
         wire signed [15:0] fir_dout;
 
         assign sample    = cen4;
-        assign sound_out = fir_dout[14:1]; // gain the signal back up
+        assign sound_out = fir_dout[13:0]; // gain the signal back up
 
         always @(posedge clk) begin
-            if( cen4 ) fir_din <= cen ? { {2{sum[13]}}, sum } : 16'd0;
+            if( cen4 ) fir_din <= cen ? { {1{sum[13]}}, sum, 1'b0 } : 16'd0;
         end
 
 
@@ -69,7 +69,7 @@ generate
             .clk        ( clk       ),
             .sample     ( cen4      ),
             .din        ( fir_din   ),
-            .dout       ( fir_out   )
+            .dout       ( fir_dout  )
         );
     end else begin
         assign sound_out = sum;

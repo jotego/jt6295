@@ -42,7 +42,8 @@ CPU and ROM interfaces do not follow the clock enable and operate at full speed.
 
 The output data rate is 4x the expected from the ss pin as there is a 4x
 interpolator built in, which eases most of the high frequency aliasing of the
-signal.
+signal. The interpolator can be disabled by setting the parameter INTERPOL to
+zero.
 
 ### ROM interface
 
