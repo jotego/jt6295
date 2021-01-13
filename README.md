@@ -45,6 +45,17 @@ interpolator built in, which eases most of the high frequency aliasing of the
 signal. The interpolator can be disabled by setting the parameter INTERPOL to
 zero.
 
+There are two different interpolator filters, one filters the 4x upsampled data
+at 0.25pi, as expected. The other one leaves some aliasing go through, by filtering
+at 0.50pi. Use the second one when there is an additional external anti aliasing
+filter, mimicking the original AA filter.
+
+INTERPOL  |  Sampling Rate  |  AA filter
+----------|-----------------|------------
+ 0        |      1          |  No
+ 1        |      4x         |  Yes, 0.25pi
+ 2        |      4x         |  Yes, 0.50pi
+
 ### ROM interface
 
 Port     | Direction | Meaning

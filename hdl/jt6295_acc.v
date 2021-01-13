@@ -28,7 +28,10 @@ module jt6295_acc(
     output               sample
 );
 
-parameter INTERPOL=1;
+parameter INTERPOL=1; // 0 = no interpolator
+                      // 1 = 4x upsampling, LPF at 0.25*pi
+                      // 2 = 4x upsampling, LPF at 0.5*pi (use if there's already)
+                      //     an antialising filter after JT6295
 
 reg signed [13:0] acc, sum;
 
@@ -67,7 +70,10 @@ generate
         end
 
 
-        jtframe_fir_mono #(.COEFFS("jt6295_up4.hex"),.KMAX(69)) u_upfilter(
+        jtframe_fir_mono #(
+            .COEFFS( INTERPOL == 1 ? "jt6295_up4.hex" : "jt6295_up4_soft.hex"),
+            .KMAX(69))
+        u_upfilter(
             .rst        ( rst       ),
             .clk        ( clk       ),
             .sample     ( cen4      ),
