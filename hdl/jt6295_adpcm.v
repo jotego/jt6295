@@ -41,9 +41,9 @@ always @(posedge clk, posedge rst ) begin
     if(rst) begin
         idx_inc_II    <= 6'd0;
         delta_idx_I   <= 6'd0;
-        delta_idx_II  <= 6'd0;   
-        delta_idx_III <= 6'd0;  
-        delta_idx_IV  <= 6'd0;   
+        delta_idx_II  <= 6'd0;
+        delta_idx_III <= 6'd0;
+        delta_idx_IV  <= 6'd0;
 
         factor_II  <= 3'd0;
         factor_III <= 2'd0;
@@ -55,7 +55,7 @@ always @(posedge clk, posedge rst ) begin
         qn_III  <= 12'd0;
         dn_IV   <= 12'd0;
         qn_IV   <= 12'd0;
-        qn_V    <= 12'd0;        
+        qn_V    <= 12'd0;
     end else if(cen) begin
         // I
         case( data[1:0] )
@@ -80,7 +80,7 @@ always @(posedge clk, posedge rst ) begin
         qn_IV        <= factor_III[1] ? qn_III + dn_III : qn_III;
         dn_IV        <= dn_III>>1;
         factor_IV    <= factor_III[0];
-        delta_idx_IV <=  delta_idx_III>6'd48 ? 
+        delta_idx_IV <=  delta_idx_III>6'd48 ?
             (factor_III[2] ? 6'd48 : 6'd0) :
             delta_idx_III;
         // IV
@@ -130,11 +130,11 @@ function [12:0] extend;
 endfunction
 
 always @(*) begin
-    snd_V = !en_V ? -13'd2 : (sign_V ? extend(snd_out) - { 1'b0, qn_V }  : 
+    snd_V = !en_V ? 13'd0 : (sign_V ? extend(snd_out) - { 1'b0, qn_V }  :
                                       extend(snd_out) + { 1'b0, qn_V } );
 end
 
-assign snd_in = snd_V > lim_pos ? lim_pos[11:0] : 
+assign snd_in = snd_V > lim_pos ? lim_pos[11:0] :
     (snd_V < lim_neg ? lim_neg[11:0] : snd_V[11:0]);
 
 always @(posedge clk, posedge rst) begin
@@ -159,13 +159,13 @@ jt6295_sh_rst #(.WIDTH(12), .STAGES(4) ) u_sound
 );
 
 initial begin
-lut[ 0] = 11'd0016; lut[ 1] = 11'd0017; lut[ 2] = 11'd0019; lut[ 3] = 11'd0021; lut[ 4] = 11'd0023; lut[ 5] = 11'd0025; lut[ 6] = 11'd0028; 
-lut[ 7] = 11'd0031; lut[ 8] = 11'd0034; lut[ 9] = 11'd0037; lut[10] = 11'd0041; lut[11] = 11'd0045; lut[12] = 11'd0050; lut[13] = 11'd0055; 
-lut[14] = 11'd0060; lut[15] = 11'd0066; lut[16] = 11'd0073; lut[17] = 11'd0080; lut[18] = 11'd0088; lut[19] = 11'd0097; lut[20] = 11'd0107; 
-lut[21] = 11'd0118; lut[22] = 11'd0130; lut[23] = 11'd0143; lut[24] = 11'd0157; lut[25] = 11'd0173; lut[26] = 11'd0190; lut[27] = 11'd0209; 
-lut[28] = 11'd0230; lut[29] = 11'd0253; lut[30] = 11'd0279; lut[31] = 11'd0307; lut[32] = 11'd0337; lut[33] = 11'd0371; lut[34] = 11'd0408; 
-lut[35] = 11'd0449; lut[36] = 11'd0494; lut[37] = 11'd0544; lut[38] = 11'd0598; lut[39] = 11'd0658; lut[40] = 11'd0724; lut[41] = 11'd0796; 
-lut[42] = 11'd0876; lut[43] = 11'd0963; lut[44] = 11'd1060; lut[45] = 11'd1166; lut[46] = 11'd1282; lut[47] = 11'd1411; lut[48] = 11'd1552; 
+lut[ 0] = 11'd0016; lut[ 1] = 11'd0017; lut[ 2] = 11'd0019; lut[ 3] = 11'd0021; lut[ 4] = 11'd0023; lut[ 5] = 11'd0025; lut[ 6] = 11'd0028;
+lut[ 7] = 11'd0031; lut[ 8] = 11'd0034; lut[ 9] = 11'd0037; lut[10] = 11'd0041; lut[11] = 11'd0045; lut[12] = 11'd0050; lut[13] = 11'd0055;
+lut[14] = 11'd0060; lut[15] = 11'd0066; lut[16] = 11'd0073; lut[17] = 11'd0080; lut[18] = 11'd0088; lut[19] = 11'd0097; lut[20] = 11'd0107;
+lut[21] = 11'd0118; lut[22] = 11'd0130; lut[23] = 11'd0143; lut[24] = 11'd0157; lut[25] = 11'd0173; lut[26] = 11'd0190; lut[27] = 11'd0209;
+lut[28] = 11'd0230; lut[29] = 11'd0253; lut[30] = 11'd0279; lut[31] = 11'd0307; lut[32] = 11'd0337; lut[33] = 11'd0371; lut[34] = 11'd0408;
+lut[35] = 11'd0449; lut[36] = 11'd0494; lut[37] = 11'd0544; lut[38] = 11'd0598; lut[39] = 11'd0658; lut[40] = 11'd0724; lut[41] = 11'd0796;
+lut[42] = 11'd0876; lut[43] = 11'd0963; lut[44] = 11'd1060; lut[45] = 11'd1166; lut[46] = 11'd1282; lut[47] = 11'd1411; lut[48] = 11'd1552;
 end
 
 initial begin
@@ -177,10 +177,10 @@ initial begin
     gain_lut[5]  = 7'd6;
     gain_lut[6]  = 7'd4;
     gain_lut[7]  = 7'd3;
-    gain_lut[8]  = 7'd2; 
-    gain_lut[9]  = 7'd0; gain_lut[10] = 7'd0; gain_lut[11] = 7'd0; 
-    gain_lut[12] = 7'd0; gain_lut[13] = 7'd0; gain_lut[14] = 7'd0; 
-    gain_lut[15] = 7'd0; 
+    gain_lut[8]  = 7'd2;
+    gain_lut[9]  = 7'd0; gain_lut[10] = 7'd0; gain_lut[11] = 7'd0;
+    gain_lut[12] = 7'd0; gain_lut[13] = 7'd0; gain_lut[14] = 7'd0;
+    gain_lut[15] = 7'd0;
 end
 
 `ifdef SIMULATION

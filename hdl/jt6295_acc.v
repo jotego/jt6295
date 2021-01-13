@@ -59,8 +59,11 @@ generate
         assign sample    = cen4;
         assign sound_out = fir_dout[13:0]; // gain the signal back up
 
-        always @(posedge clk) begin
-            if( cen4 ) fir_din <= cen ? { {1{sum[13]}}, sum, 1'b0 } : 16'd0;
+        always @(posedge clk, posedge rst) begin
+            if( rst )
+                fir_din <= 16'd0;
+            else
+                if( cen4 ) fir_din <= cen ? { {1{sum[13]}}, sum, 1'b0 } : 16'd0;
         end
 
 
