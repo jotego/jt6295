@@ -18,8 +18,6 @@
 	Date: 6-1-2020
 	*/
 
-`timescale 1ns / 1ps
-
 // STAGES must be greater than 2
 module jt6295_sh_rst #(parameter WIDTH=5, STAGES=32, RSTVAL=1'b0 )
 (
