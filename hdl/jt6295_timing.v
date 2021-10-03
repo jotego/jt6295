@@ -29,7 +29,7 @@ module jt6295_timing(
     output reg  cen_sr32
 );
 
-reg  [2:0] base=2'd0;
+reg  [2:0] base=0;
 reg  [5:0] cnt =6'd0;
 wire [2:0] lim = ss ? 3'h3 : 3'h4;
 

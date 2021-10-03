@@ -46,7 +46,7 @@ always @(posedge clk, posedge rst ) begin
         delta_idx_IV  <= 6'd0;
 
         factor_II  <= 3'd0;
-        factor_III <= 2'd0;
+        factor_III <= 0;
         factor_IV  <= 1'd0;
         { sign_II, sign_III, sign_IV, sign_V } <=4'd0;
         dn_II   <= 12'd0;

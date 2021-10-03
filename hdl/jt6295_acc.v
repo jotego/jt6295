@@ -27,7 +27,7 @@ module jt6295_acc(
     output signed [13:0] sound_out,
     output               sample
 );
-
+/* verilator lint_off WIDTH */
 parameter INTERPOL=1; // 0 = no interpolator
                       // 1 = 4x upsampling, LPF at 0.25*pi
                       // 2 = 4x upsampling, LPF at 0.5*pi (use if there's already)
@@ -85,5 +85,5 @@ generate
         assign sample    = cen;
     end
 endgenerate
-
+/* verilator lint_on WIDTH */
 endmodule
