@@ -42,11 +42,10 @@ module jt6295_ctrl(
 );
 
 reg  last_wrn;
-wire posedge_wrn  = wrn && !last_wrn;
+wire negedge_wrn  = !wrn && last_wrn;
 
 // new request
 reg [6:0] phrase;
-reg [7:0] dlatch;
 reg       push, pull;
 reg [3:0] ch, new_att;
 reg       cmd;
@@ -65,13 +64,13 @@ initial begin
 end
 always @(posedge zero) ticks<=ticks+1;
 always @(posedge clk ) begin
-    if( posedge_wrn ) begin
-        if( !cmd && !dlatch[7] ) begin
-            $fwrite(fdump,"@%0d - Mute %1X\n", ticks, dlatch[6:3]);
+    if( negedge_wrn ) begin
+        if( !cmd && !din[7] ) begin
+            $fwrite(fdump,"@%0d - Mute %1X\n", ticks, din[6:3]);
         end
         if( cmd ) begin
             $fwrite(fdump,"@%0d - Start %1X, phrase %X, Att %X\n",
-                ticks, dlatch[7:4], phrase, dlatch[3:0] );
+                ticks, din[7:4], phrase, din[3:0] );
         end
     end
 end
@@ -86,28 +85,24 @@ always @(posedge clk) begin
         ch       <= 4'd0;
         pull     <= 1'b1;
         phrase   <= 7'd0;
-        dlatch   <= 0;
     end else begin
-        if( !wrn ) dlatch<=din; // some CPUs change the data at the same time than
-                                // wrn so in order to latch the value correctly
-                                // we have to get it while wrn is low. ex: jtmidres
         if( cen4 ) begin
             stop <= stop & busy;
         end
         if( push ) pull <= 1'b0;
-        if( posedge_wrn  ) begin // new write
+        if( negedge_wrn  ) begin // new write
             if( cmd ) begin // 2nd byte
-                ch      <= dlatch[7:4];
-                new_att <= dlatch[3:0];
+                ch      <= din[7:4];
+                new_att <= din[3:0];
                 cmd     <= 1'b0;
                 pull    <= 1'b1;
             end
-            else if( dlatch[7] ) begin // channel start
-                phrase <= dlatch[6:0];
+            else if( din[7] ) begin // channel start
+                phrase <= din[6:0];
                 cmd    <= 1'b1; // wait for second byte
                 stop   <= 4'd0;
             end else begin // stop data
-                stop   <= dlatch[6:3];
+                stop   <= din[6:3];
             end
         end
     end
