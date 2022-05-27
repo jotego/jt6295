@@ -149,8 +149,7 @@ always @(posedge clk, posedge rst) begin
     end
 end
 
-jt6295_sh_rst #(.WIDTH(12), .STAGES(4) ) u_sound
-(
+jt6295_sh_rst #(.WIDTH(12), .STAGES(4) ) u_sound(
     .rst    ( rst       ),
     .clk    ( clk       ),
     .clk_en ( cen       ),
@@ -198,6 +197,7 @@ always @(posedge clk) if(cen) begin
         4'd2: snd1 <= snd_in;
         4'd4: snd2 <= snd_in;
         4'd8: snd3 <= snd_in;
+        default:;
     endcase
 end
 `endif

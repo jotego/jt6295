@@ -93,10 +93,11 @@ always @(posedge clk, posedge rst ) begin
         end
         `ifdef SIMULATION
         case( ch )
-            4'b0001: cnt0 <= cnt>>1;
-            4'b0010: cnt1 <= cnt>>1;
-            4'b0100: cnt2 <= cnt>>1;
-            4'b1000: cnt3 <= cnt>>1;
+            4'b0001: cnt0 <= cnt[18:1];
+            4'b0010: cnt1 <= cnt[18:1];
+            4'b0100: cnt2 <= cnt[18:1];
+            4'b1000: cnt3 <= cnt[18:1];
+            default:;
         endcase        
         `endif
     end
