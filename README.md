@@ -2,7 +2,7 @@
 4 channel ADPCM decoder compatible with OKI 6295, by Jose Tejada (aka jotego)
 
 You can show your appreciation through
-* [Patreon](https://patreon.com/topapate), by supporting releases
+* [Patreon](https://patreon.com/jotego), by supporting releases
 * [Paypal](https://paypal.me/topapate), with a donation
 
 JT6295 is an ADPCM sound source written in Verilog, fully compatible with OKI MSM6295.
