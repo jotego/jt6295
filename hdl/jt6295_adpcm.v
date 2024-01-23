@@ -113,29 +113,20 @@ jt6295_sh_rst #(.WIDTH(4), .STAGES(4) ) u_att
 );
 
 
-wire signed [11:0] snd_in, snd_out;
-reg  signed [11:0] snd_VI;
+wire signed [11:0] snd_out;
+reg  signed [11:0] snd_V, unlim_V, snd_VI;
 reg  signed [ 6:0] gain_lut[0:15];
 reg  signed [ 6:0] gain_VI; // leave the MSB for the sign
+reg                ov_V;
 wire signed [16:0] mul_VI = snd_VI * gain_VI; // multipliers are abundant
     // in the FPGA, so I just use one.
-reg  signed [12:0] snd_V;
-
-wire signed [12:0] lim_pos =  13'd2047;
-wire signed [12:0] lim_neg = -13'd2048;
-
-function [12:0] extend;
-    input [11:0] a;
-    extend = { a[11], a };
-endfunction
 
 always @(*) begin
-    snd_V = !en_V ? 13'd0 : (sign_V ? extend(snd_out) - { 1'b0, qn_V }  :
-                                      extend(snd_out) + { 1'b0, qn_V } );
+    unlim_V = !en_V ? 12'd0 : (sign_V ? snd_out - { 1'b0, qn_V[11:1] }  :
+                                        snd_out + { 1'b0, qn_V[11:1] } );
+    ov_V  = &{snd_out[11],sign_V,~unlim_V[11]}|&{~snd_out[11],~sign_V,unlim_V[11]}; // overflow check
+    snd_V = ov_V ? {snd_out[11],{11{~snd_out[11]}}} : unlim_V; // clamp
 end
-
-assign snd_in = snd_V > lim_pos ? lim_pos[11:0] :
-    (snd_V < lim_neg ? lim_neg[11:0] : snd_V[11:0]);
 
 always @(posedge clk, posedge rst) begin
     if(rst) begin
@@ -143,7 +134,7 @@ always @(posedge clk, posedge rst) begin
         gain_VI <= 7'd0;
         sound   <= 12'd0;
     end else if(cen) begin
-        snd_VI  <= snd_in;
+        snd_VI  <= snd_V;
         gain_VI <= gain_lut[att_V];
         sound   <= mul_VI[16:5];
     end
@@ -153,7 +144,7 @@ jt6295_sh_rst #(.WIDTH(12), .STAGES(4) ) u_sound(
     .rst    ( rst       ),
     .clk    ( clk       ),
     .clk_en ( cen       ),
-    .din    ( snd_in    ),
+    .din    ( snd_V     ),
     .drop   ( snd_out   )
 );
 
@@ -193,10 +184,10 @@ end
 
 always @(posedge clk) if(cen) begin
     case(ch)
-        4'd1: snd0 <= snd_in;
-        4'd2: snd1 <= snd_in;
-        4'd4: snd2 <= snd_in;
-        4'd8: snd3 <= snd_in;
+        4'd1: snd0 <= snd_V;
+        4'd2: snd1 <= snd_V;
+        4'd4: snd2 <= snd_V;
+        4'd8: snd3 <= snd_V;
         default:;
     endcase
 end
