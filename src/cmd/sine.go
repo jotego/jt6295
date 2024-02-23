@@ -186,14 +186,39 @@ func encode( raw []int ) []byte {
 	return enc
 }
 
+func copy_patch( rom []byte, id int, used *int, enc []byte ) {
+	if *used==0 { *used = 128*8 }	// start encoding after the header
+	id += 1		// patch header starts at byte 8
+	id <<= 3
+	// start address
+	rom[ id   ] = byte((*used>>16)&3)
+	rom[ id+1 ] = byte((*used>>8)&0xff)
+	rom[ id+2 ] = byte( *used   )
+	// end address
+	k := *used
+	*used += len(enc)
+	if *used>=128*1024 { *used = 128*1024-1}
+	rom[ id+3 ] = byte((*used>>16)&3)
+	rom[ id+4 ] = byte((*used>>8)&0xff)
+	rom[ id+5 ] = byte( *used&0xff)
+	for i, _ := range enc {
+		rom[k] = enc[i]
+		k+=1
+	}
+}
+
 func Run(cmd *cobra.Command, args []string) {
 	var patches []Patch
 	read_yaml(args[0], &patches)
 	check_patches(patches)
+	rom := make([]byte,128*1024)
+	used := 0
 	for k, _ := range patches {
 		patches[k].buf = make_patch(patches[k])
 		patches[k].enc = encode(patches[k].buf)
 		dump_wav( fmt.Sprintf("patch%02d.wav",k), patches[k].buf )
 		dump_patch( fmt.Sprintf("patch%02d.bin",k), patches[k].enc )
+		copy_patch( rom, k, &used, patches[k].enc )
 	}
+	os.WriteFile( "patches.bin", rom, 0666 )
 }

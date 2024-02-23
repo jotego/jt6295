@@ -85,6 +85,7 @@ always @(posedge clk) begin
         ch       <= 4'd0;
         pull     <= 1'b1;
         phrase   <= 7'd0;
+        new_att  <= 0;
     end else begin
         if( cen4 ) begin
             stop <= stop & busy;
@@ -118,44 +119,44 @@ assign rom_addr = { phrase, addr_lsb };
 // Request phrase address
 always @(posedge clk) begin
     if( rst ) begin
-        st <= 3'd7;
-        att <= 4'd0;
-        start_addr <= 18'd0;
-        stop_addr  <= 18'd0;
-        start  <= 4'd0;
-        push      <= 1'b0;
-        addr_lsb  <= 3'b0;
+        st         <= 7;
+        att        <= 0;
+        start_addr <= 0;
+        stop_addr  <= 0;
+        start      <= 0;
+        push       <= 0;
+        addr_lsb   <= 0;
     end else begin
-        if(st!=3'd7) begin
-            wrom <= 1'b0;
+        if( st!=7 ) begin
+            wrom <= 0;
             if( !wrom && rom_ok ) begin
                 st       <= st+3'd1;
                 addr_lsb <= st;
-                wrom     <= 1'b1;
+                wrom     <= 1;
             end
         end
-        case(st)
-            3'd7: begin
+        case( st )
+            7: begin
                 start    <= start & ~ack;
-                addr_lsb <= 3'd0;
+                addr_lsb <= 0;
                 if(pull) begin
-                    st       <= 3'd0;
-                    wrom     <= 1'b1;
-                    push     <= 1'b1;
+                    st       <= 0;
+                    wrom     <= 1;
+                    push     <= 1;
                 end
             end
-            3'd0:;
-            3'd1: new_start[17:16] <= rom_data[1:0];
-            3'd2: new_start[15: 8] <= rom_data;
-            3'd3: new_start[ 7: 0] <= rom_data;
-            3'd4: new_stop [17:16] <= rom_data[1:0];
-            3'd5: new_stop [15: 8] <= rom_data;
-            3'd6: begin
+            0:;
+            1: new_start[17:16] <= rom_data[1:0];
+            2: new_start[15: 8] <= rom_data;
+            3: new_start[ 7: 0] <= rom_data;
+            4: new_stop [17:16] <= rom_data[1:0];
+            5: new_stop [15: 8] <= rom_data;
+            6: begin
                 start       <= ch;
                 start_addr  <= new_start;
                 stop_addr   <= {new_stop[17:8], rom_data} ;
                 att         <= new_att;
-                push        <= 1'b0;
+                push        <= 0;
             end
         endcase
     end

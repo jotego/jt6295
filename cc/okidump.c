@@ -117,7 +117,7 @@ void dump( char *rom ) {
         start = ((((rom[aux+0] & 3) << 8) | (rom[aux+1]&0xff))<<8) | (rom[aux+2]&0xff);
         end   = ((((rom[aux+3] & 3) << 8) | (rom[aux+4]&0xff))<<8) | (rom[aux+5]&0xff);
         if( start > end ) {
-            // printf("Warning: reverse order for sample 0x%x\n", k );
+            printf("Warning: reverse order for sample 0x%x\n", k );
             continue;
         }
         if( start == end ) continue;
@@ -127,7 +127,8 @@ void dump( char *rom ) {
             printf("Cannot create file %s\n", fname );
             return;
         }
-        printf("%3d -> %6X to %6X\n", k, start, end );
+        float dur = (float)(end-start)/8000.0*2.0;
+        printf("%3d -> %6X to %6X (%.1f s)\n", k, start, end, dur );
         fwrite( rom+start, end-start, 1, fout );
         fclose(fout);
     }

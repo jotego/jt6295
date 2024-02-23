@@ -34,7 +34,7 @@ module jt6295(
     output                 sample
 );
 
-parameter INTERPOL=1; // 0 = no interpolator
+parameter INTERPOL=0; // 0 = no interpolator
                       // 1 = 4x upsampling, LPF at 0.25*pi
                       // 2 = 4x upsampling, LPF at 0.5*pi (use if there's already)
                       //     an antialising filter after JT6295

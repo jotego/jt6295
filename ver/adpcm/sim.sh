@@ -9,7 +9,7 @@ if [ ! -e ../../src/jt6295 ]; then
     cd -
 fi
 
-../../src/jt6295 sine sine100.yaml
+# ../../src/jt6295 sine spectrum.yaml
 
 FILES="test.v ../../hdl/jt6295_adpcm.v ../../hdl/jt6295_sh_rst.v"
 

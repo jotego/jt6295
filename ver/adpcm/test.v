@@ -20,6 +20,15 @@ jt6295_adpcm uut(
     .data       ( adpcm_en ? din : 4'd0       ),
     .sound      ( sound     )
 );
+/*
+jtframe_pole #(.WS(12)) u_pole(
+    .rst        ( rst       ),
+    .clk        ( clk       ),
+    .sample     ( oki_sample),
+    .a          ( 6'h40     ),
+    .sin        ( sndx      ),
+    .sout       ( filtered  )
+);*/
 
 reg [7:0] data[0:1024*32-1];
 

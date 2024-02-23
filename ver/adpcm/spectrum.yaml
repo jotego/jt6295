@@ -1,0 +1,16 @@
+- duration: 4.0
+  waves:
+    - amp: 1600
+      freq: 20
+- duration: 4.0
+  waves:
+    - amp: 1600
+      freq: 200
+- duration: 4.0
+  waves:
+    - amp: 1600
+      freq: 1000
+- duration: 4.0
+  waves:
+    - amp: 1600
+      freq: 2000
