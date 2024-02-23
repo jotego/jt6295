@@ -9,7 +9,7 @@ wire [3:0] din;
 wire signed [11:0] sound;
 wire adpcm_en;
 
-assign adpcm_en = cnt>=0 && !rst;
+assign adpcm_en = cnt>=0 && !rst && cen;
 
 jt6295_adpcm uut(
     .rst        ( rst       ),
@@ -17,7 +17,7 @@ jt6295_adpcm uut(
     .cen        ( 1'b1      ),
     .en         ( adpcm_en  ),
     .att        ( 4'd0      ),
-    .data       ( din       ),
+    .data       ( adpcm_en ? din : 4'd0       ),
     .sound      ( sound     )
 );
 
@@ -28,18 +28,21 @@ integer f,fcnt;
 initial begin
     f=$fopen("patch00.bin","rb");
     fcnt=$fread(data,f);
+    fcnt=fcnt<<1;
     $display("%d samples read",fcnt*2);
     $fclose(f);
 
     clk=1'b0;
-    forever #325.521 clk=~clk;
+    forever #(325.521/2) clk=~clk;
 end
 
 initial begin
     rst = 1'b0;
     #150 rst=1'b1;
     #750 rst=1'b0;
-    #10_000_000 $finish;
+    #200_000_000;
+    $display("time out");
+    $finish;
 end
 
 integer cnt, cen_cnt;

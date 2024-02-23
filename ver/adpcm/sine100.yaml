@@ -1,0 +1,6 @@
+- duration: 1.0
+  waves:
+    - amp: 2047
+      freq: 200
+    - amp: 800
+      freq: 20

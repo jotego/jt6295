@@ -122,8 +122,8 @@ wire signed [16:0] mul_VI = snd_VI * gain_VI; // multipliers are abundant
     // in the FPGA, so I just use one.
 
 always @(*) begin
-    unlim_V =  sign_V ? snd_out - { 1'b0, qn_V[11:1] } :
-                        snd_out + { 1'b0, qn_V[11:1] };
+    unlim_V =  sign_V ? snd_out - qn_V :
+                        snd_out + qn_V;
     ov_V  = &{snd_out[11],sign_V,~unlim_V[11]}|&{~snd_out[11],~sign_V,unlim_V[11]}; // overflow check
     snd_V = !en_V ? 12'd0 :
              ov_V ? {snd_out[11],{11{~snd_out[11]}}} : unlim_V; // clamp

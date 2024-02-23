@@ -21,7 +21,7 @@ var sineCmd = &cobra.Command{
 of each patch. Call jt6295 sine file.yml to convert the file to a binary ROM file.
 
 To resample output .wav files, use:
-	ffmpeg -i file.wav -ar 48000 output.wav`,
+	ffmpeg -i patch00.wav -ar 48000 x.wav`,
 	Args: cobra.ExactArgs(1),
 	Run: Run,
 }
@@ -93,7 +93,7 @@ func clip( v *int ) {
 func add_wave( buf []int, w WaveDesc ) {
 	f0 := 6.283185*float64(w.Freq)/float64(rate)	// 2*pi*f/Fs
 	var f float64
-	a := 2.0*float64(w.Amp)
+	a := float64(w.Amp)
 	for k, _ := range buf {
 		buf[k] += int(math.Round(a * math.Sin(f)))
 		f+=f0
