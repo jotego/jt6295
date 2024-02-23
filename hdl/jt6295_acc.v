@@ -28,10 +28,12 @@ module jt6295_acc(
     output               sample
 );
 /* verilator lint_off WIDTH */
-parameter INTERPOL=1; // 0 = no interpolator
-                      // 1 = 4x upsampling, LPF at 0.25*pi
-                      // 2 = 4x upsampling, LPF at 0.5*pi (use if there's already)
+// Note that the interpolators remove aliasing much more
+// aggressively than typical filters found on arcade PCBs
+parameter INTERPOL=0; // 0 = no interpolator (recommended if there's already)
                       //     an antialising filter after JT6295
+                      // 1 = 4x upsampling, LPF at 0.25*pi (too clean)
+                      // 2 = 4x upsampling, LPF at 0.5*pi  (will let the 1st alias pass)
 
 reg signed [13:0] acc, sum;
 
