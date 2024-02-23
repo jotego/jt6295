@@ -67,8 +67,8 @@ always @(posedge clk, posedge rst ) begin
         sign_II      <= data[3];
         delta_idx_II <= en ? delta_idx_I : 6'd0;
         factor_II    <= en ? data[2:0] : 3'd0;
-        dn_II        <= { 1'b0, lut[delta_idx_I] };
-        qn_II        <= { 1'd0, lut[delta_idx_I]>>3};
+        qn_II        <= { 1'd0, lut[delta_idx_I]>>3};   // next value, starts at 1/8 of step size
+        dn_II        <= { 1'b0, lut[delta_idx_I] };     // step size
         // II
         sign_III      <= sign_II;
         delta_idx_III <= factor_II[2] ? (delta_idx_II+idx_inc_II) : (delta_idx_II-6'd1);
