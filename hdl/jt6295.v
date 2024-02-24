@@ -38,10 +38,14 @@ parameter INTERPOL=0; // 0 = no interpolator
                       // 1 = 4x upsampling, LPF at 0.25*pi
                       // 2 = 4x upsampling, LPF at 0.5*pi (use if there's already)
                       //     an antialising filter after JT6295
+parameter SAMPLE=0;   // 0 = output 48 kHz at sample pin
+                      // 1 = output actual sample rate (set by SS pin and internal interpolator)
 
 wire        cen_sr;  // sampling rate
 wire        cen_sr4, cen_sr4b; // 4x sampling rate
-wire        cen_sr32; // 32x sampling rate
+wire        cen_sr32, // 32x sampling rate
+            cen_48k,  // 48 kHz
+            cen_eff;  // effective sound sampling rate after optional interpolator
 
 wire [ 3:0] busy, ack, start, stop;
 wire [17:0] start_addr, stop_addr ,
@@ -54,7 +58,8 @@ wire        ctrl_ok, ctrl_cs, zero;
 wire        pipe_en;
 wire signed [11:0] pipe_snd;
 
-assign      dout = { 4'hf, busy | start };
+assign dout   = { 4'hf, busy | start };
+assign sample = SAMPLE==0 ? cen_48k : cen_eff;
 
 jt6295_timing u_timing(
     .clk        ( clk       ),
@@ -64,7 +69,7 @@ jt6295_timing u_timing(
     .cen_sr4    ( cen_sr4   ),
     .cen_sr4b   ( cen_sr4b  ),
     .cen_sr32   ( cen_sr32  ),
-    .cen_48k    ( sample    )
+    .cen_48k    ( cen_48k   )
 );
 
 // ROM interface
@@ -157,7 +162,7 @@ jt6295_acc #(.INTERPOL(INTERPOL)) u_acc(
     // serialized data
     .sound_in   ( pipe_snd      ),
     .sound_out  ( sound         ),
-    .sample     (               )
+    .sample     ( cen_eff       )
 );
 
 `ifdef SIMULATION
