@@ -31,7 +31,7 @@ module jt6295(
     input                  rom_ok,
     // Sound output
     output signed [13:0]   sound,
-    output                 sample
+    output                 sample   // 48 kHz for a 1.000 MHz cen
 );
 
 parameter INTERPOL=0; // 0 = no interpolator
@@ -63,7 +63,8 @@ jt6295_timing u_timing(
     .cen_sr     ( cen_sr    ),
     .cen_sr4    ( cen_sr4   ),
     .cen_sr4b   ( cen_sr4b  ),
-    .cen_sr32   ( cen_sr32  )
+    .cen_sr32   ( cen_sr32  ),
+    .cen_48k    ( sample    )
 );
 
 // ROM interface
@@ -156,7 +157,7 @@ jt6295_acc #(.INTERPOL(INTERPOL)) u_acc(
     // serialized data
     .sound_in   ( pipe_snd      ),
     .sound_out  ( sound         ),
-    .sample     ( sample        )
+    .sample     (               )
 );
 
 `ifdef SIMULATION

@@ -16,6 +16,7 @@
     Version: 1.0
     Date: 6-1-2020 */
 
+// input cen should be 1,000 kHz
 // SS low  = divides by 164 (25.6 and 6.5kHz)
 // SS high = divides by 132 (32   and 8  kHz)
 
@@ -26,13 +27,23 @@ module jt6295_timing(
     output reg  cen_sr,   // Sample rate
     output reg  cen_sr4,  // 4x sample rate
     output reg  cen_sr4b, // 4x sample rate, 180 shift
-    output reg  cen_sr32
+    output reg  cen_sr32,
+    output reg  cen_48k   // 48 kHz low pass filter
 );
+
+localparam [7:0] N48=8'd6, D48=8'd125;
 
 reg  [2:0] base=0;
 reg  [5:0] cnt =6'd0;
 wire [2:0] lim = ss ? 3'h3 : 3'h4;
 
+reg  [7:0] cnt48=0;
+wire       over48 = cnt48>=D48;
+
+always @(posedge clk) begin
+    if(cen) cnt48 <= over48 ? cnt48-(D48-N48) : cnt48+N48;
+    cen_48k <= over48 && cen;
+end
 
 always @(posedge clk) begin
     cen_sr4 <= 1'd0;
