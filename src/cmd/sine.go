@@ -12,6 +12,7 @@ import (
 )
 
 var rate int
+var step_size [49]int
 
 // sineCmd represents the sine command
 var sineCmd = &cobra.Command{
@@ -43,6 +44,11 @@ type Patch struct{
 func init() {
 	rootCmd.AddCommand(sineCmd)
 	sineCmd.Flags().IntVarP( &rate, "rate", "r", 8000, "Sampling rate (Hz)")
+
+	step_size = [49]int{ 16, 17, 19, 21, 23, 25, 28, 31, 34, 37, 41,
+		45, 50, 55, 60, 66, 73, 80, 88, 97, 107, 118, 130, 143, 157, 173,
+		190, 209, 230, 253, 279, 307, 337, 371, 408, 449, 494, 544, 598, 658,
+		724, 796, 876, 963, 1060, 1166, 1282, 1411, 1552 }
 }
 
 func must( e error ) {
@@ -132,11 +138,27 @@ func dump_patch( fname string, buf []byte ) {
 	os.WriteFile(fname, buf, 0666 )
 }
 
+func decOne( code int, idx *int ) int {
+	ss := step_size[*idx]
+	diff := ss>>3
+	if (code&1)!=0 { diff += ss>>2 }
+	if (code&2)!=0 { diff += ss>>1 }
+	if (code&4)!=0 { diff += ss    }
+	if (code&8)!=0 { diff  = -diff }
+	// index
+	switch( code&7 ) {
+		case 4: *idx+=2
+		case 5: *idx+=4
+		case 6: *idx+=6
+		case 7: *idx+=8
+		default: *idx-=1
+	}
+	if *idx<0  { *idx=0  }
+	if *idx>48 { *idx=48 }
+	return diff
+}
+
 func encode( raw []int ) []byte {
-	step_size := [49]int{ 16, 17, 19, 21, 23, 25, 28, 31, 34, 37, 41,
-		45, 50, 55, 60, 66, 73, 80, 88, 97, 107, 118, 130, 143, 157, 173,
-		190, 209, 230, 253, 279, 307, 337, 371, 408, 449, 494, 544, 598, 658,
-		724, 796, 876, 963, 1060, 1166, 1282, 1411, 1552 };
 	enc := make([]byte,len(raw)/2)
 	ss  := 0	// step size
 	idx := 0	// step size index for next sample
@@ -161,23 +183,8 @@ func encode( raw []int ) []byte {
 			code |= 1
 		}
 		// calculate the encoded sample value
-		diff = ss>>3
-		if (code&1)!=0 { diff += ss>>2 }
-		if (code&2)!=0 { diff += ss>>1 }
-		if (code&4)!=0 { diff += ss    }
-		if (code&8)!=0 { diff  = -diff }
-		last += diff
+		last += decOne(code, &idx)
 		clip( &last )
-		// adjust index
-		switch( code&7 ) {
-			case 4: idx+=2
-			case 5: idx+=4
-			case 6: idx+=6
-			case 7: idx+=8
-			default: idx-=1
-		}
-		if idx<0  { idx=0  }
-		if idx>48 { idx=48 }
 		// push into the array
 		if (k&1)==0 { code <<= 4 } // upper nibble used first
 		enc[k>>1] |= byte(code)
