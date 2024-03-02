@@ -5,6 +5,7 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"fmt"
 	"os"
 	"strings"
 
@@ -48,11 +49,21 @@ func decode( enc []byte ) (dec []int) {
 	return dec
 }
 
+func dump_txt( fname string, d []int ) {
+	f,e := os.Create(fname)
+	must(e)
+	defer f.Close()
+	for _, each := range d {
+		fmt.Fprintf(f,"%d\n",each)
+	}
+}
+
 func runWav(cmd *cobra.Command, args []string) {
 	fname := args[0]
 	buf, e := os.ReadFile(fname)
 	must(e)
 	dec := decode(buf)
-	fname = strings.TrimSuffix(fname,".bin")+".wav"
-	dump_wav(fname, dec)
+	fname = strings.TrimSuffix(fname,".bin")
+	dump_wav(fname+".wav", dec)
+	dump_txt(fname+".csv", dec)
 }
