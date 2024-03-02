@@ -159,6 +159,19 @@ lut[35] = 11'd0449; lut[36] = 11'd0494; lut[37] = 11'd0544; lut[38] = 11'd0598; 
 lut[42] = 11'd0876; lut[43] = 11'd0963; lut[44] = 11'd1060; lut[45] = 11'd1166; lut[46] = 11'd1282; lut[47] = 11'd1411; lut[48] = 11'd1552;
 end
 
+// Attenuation has been verified against two CPS1 boards
+//     Magic Sword         SF2               JTCPS1
+//     88617A             89626A             fbb89f0
+// set dB      delta     dB    delta    dB     delta
+// 0   1,1              0,9            -9,1
+// 1   -2,2    -3,3    -2,4    -3,3    -12,4   -3,3
+// 2   -4,9    -2,7    -5,1    -2,7    -15,2   -2,8
+// 3   -8,2    -3,3    -8,4    -3,3    -18,4   -3,2
+// 4   -11     -2,8    -11,1   -2,7    -21,2   -2,8
+// 5   -13,5   -2,5    -13,6   -2,5    -23,7   -2,5
+// 6   -16,9   -3,4    -17,2   -3,6    -27,2   -3,5
+// 7   -19,3   -2,4    -19,7   -2,5    -29,7   -2,5
+// sampled at 192kHz, using an FFT bin size of 4096 samples, power at 637 Hz
 initial begin
     gain_lut[0]  = 7'd32;
     gain_lut[1]  = 7'd22;

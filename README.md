@@ -85,8 +85,9 @@ Note that rom_ok is not valid for the clock cycle immediately after rising rom_c
 
 ## FPGA arcade cores using this module:
 
-* [Double Dragon 2](https://github.com/jotego/jtdd), by the same author
-* [CAPCOM SYSTEM](https://github.com/jotego/jtcps1), by the same author
+- [CAPCOM SYSTEM](https://github.com/jotego/jtcores), by the same author
+- [Double Dragon 2](https://github.com/jotego/jtcores), by the same author
+- And many others
 
 ## Related Projects
 
