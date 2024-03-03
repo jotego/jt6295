@@ -87,7 +87,7 @@ always @(posedge clk) begin
     cen_cnt <= cen_cnt==0 ? 3 : (cen_cnt-1);
 end
 
-//`ifdef DUMP
+`ifdef DUMP
 `ifndef NCVERILOG
     initial begin
         $dumpfile("test.lxt");
@@ -100,6 +100,6 @@ end
         $shm_probe(test,"AS");
     end
 `endif
-//`endif
+`endif
 
 endmodule

@@ -114,7 +114,8 @@ jt6295_sh_rst #(.WIDTH(4), .STAGES(4) ) u_att
 
 
 wire signed [11:0] snd_out;
-reg  signed [11:0] snd_V, unlim_V, snd_VI;
+reg  signed [11:0] snd_V, snd_VI;
+reg  signed [12:0] unlim_V;
 reg  signed [ 6:0] gain_lut[0:15];
 reg  signed [ 6:0] gain_VI; // leave the MSB for the sign
 reg                ov_V;
@@ -122,11 +123,12 @@ wire signed [16:0] mul_VI = snd_VI * gain_VI; // multipliers are abundant
     // in the FPGA, so I just use one.
 
 always @(*) begin
-    unlim_V =  sign_V ? snd_out - qn_V :
-                        snd_out + qn_V;
+    unlim_V =  sign_V ? { snd_out[11], snd_out } - qn_V :
+                        { snd_out[11], snd_out } + qn_V;
     ov_V  = &{snd_out[11],sign_V,~unlim_V[11]}|&{~snd_out[11],~sign_V,unlim_V[11]}; // overflow check
+    if( ^unlim_V[12:11] ) ov_V=1;
     snd_V = !en_V ? 12'd0 :
-             ov_V ? {snd_out[11],{11{~snd_out[11]}}} : unlim_V; // clamp
+             ov_V ? {unlim_V[12],{11{~unlim_V[12]}}} : unlim_V[11:0]; // clamp
 end
 
 always @(posedge clk, posedge rst) begin
