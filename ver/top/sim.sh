@@ -6,7 +6,7 @@ if which verilator; then
     rm -f test.vcd
     mkfifo test.vcd
     vcd2fst -p test.vcd test.fst&
-    verilator ../../hdl/*.v test_verilator.v --binary --top test \
+    verilator ../../hdl/*.v test_verilator.v $JTFRAME/hdl/sound/jtframe_iir2.v --binary --top test \
         --timescale 1ns/1ps +define+SIMULATION  --trace +define+DUMP
     obj_dir/Vtest
     wait
