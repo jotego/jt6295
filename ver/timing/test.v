@@ -36,6 +36,7 @@ always @(posedge clk) begin
 end
 
 jt6295_timing uut(
+    .rst        ( 1'b0      ),
     .clk        ( clk       ),
     .cen        ( cen       ),
     .ss         ( ss        ),
