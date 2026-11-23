@@ -41,9 +41,6 @@ wire [2:0] lim = ss ? 3'h3 : 3'h4;
 reg  [7:0] cnt48=0;
 wire       over48 = cnt48>=D48;
 
-// The counters are held during reset, so the sample rate always has the same
-// phase when the reset is released. Otherwise, it would depend on how long
-// the reset lasted and the game would not repeat from one run to the next
 always @(posedge clk) begin
     if(cen) cnt48 <= over48 ? cnt48-(D48-N48) : cnt48+N48;
     cen_48k <= over48 && cen;
