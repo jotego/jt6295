@@ -62,6 +62,7 @@ assign dout   = { 4'hf, busy | start };
 assign sample = SAMPLE==0 ? cen_48k : cen_eff;
 
 jt6295_timing u_timing(
+    .rst        ( rst       ),
     .clk        ( clk       ),
     .cen        ( cen       ),
     .ss         ( ss        ),

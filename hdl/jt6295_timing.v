@@ -21,6 +21,7 @@
 // SS high = divides by 132 (32   and 8  kHz)
 
 module jt6295_timing(
+    input       rst,
     input       clk,
     input       cen,
     input       ss,
@@ -43,6 +44,10 @@ wire       over48 = cnt48>=D48;
 always @(posedge clk) begin
     if(cen) cnt48 <= over48 ? cnt48-(D48-N48) : cnt48+N48;
     cen_48k <= over48 && cen;
+    if( rst ) begin
+        cnt48   <= 0;
+        cen_48k <= 0;
+    end
 end
 
 always @(posedge clk) begin
@@ -58,6 +63,14 @@ always @(posedge clk) begin
         cen_sr4 <= !cnt[5] && cnt[2:0] == 3'b000 && base == 3'd0;
         cen_sr4b<= !cnt[5] && cnt[2:0] == 3'b100 && base == 3'd0;
         cen_sr  <= {cnt,base} == 9'd0;
+    end
+    if( rst ) begin
+        base     <= 0;
+        cnt      <= 0;
+        cen_sr4  <= 0;
+        cen_sr4b <= 0;
+        cen_sr   <= 0;
+        cen_sr32 <= 0;
     end
 end
 
